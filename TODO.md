@@ -1,7 +1,7 @@
 # TODO
 
-- [ ] Install Vite, Rolldown/esbuild (Vite 6 defaults to Rolldown/esbuild as its targets). [priority:high]
-- [ ] Install and configure publint for package validation. [priority:medium]
-- [ ] Configure `jsr.json` and JSR fields in `package.json`. [priority:medium]
-- [ ] Setup source/distribution directory structure. [priority:medium]
-- [ ] Add basic Vite build config. [priority:medium]
+- [x] Install Vite, Rolldown/esbuild (Vite 6 uses esbuild for speed). [priority:high]
+- [x] Install and configure publint for package validation. [priority:medium]
+- [x] Configure `jsr.json` and JSR fields in `package.json`. [priority:medium]
+- [x] Setup source/distribution directory structure. [priority:medium]
+- [x] Add basic Vite build config with declaration generation. [priority:medium]

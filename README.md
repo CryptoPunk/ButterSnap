@@ -1,15 +1,39 @@
-# buttersync
+# ButterSync
 
-To install dependencies:
+A modern TypeScript skeleton repository.
 
+## Features
+- **Runtime**: [Bun](https://bun.sh)
+- **Bundler**: [Vite](https://vite.dev) (using esbuild for speed)
+- **Validation**: [publint](https://publint.dev) for package compliance
+- **Registry**: [JSR](https://jsr.io) ready
+- **Language**: TypeScript (latest)
+
+## Getting Started
+
+### Installation
 ```bash
 bun install
 ```
 
-To run:
-
+### Development
 ```bash
-bun run index.ts
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.3.11. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+### Build & Validate
+```bash
+bun run build
+```
+
+### Testing
+```bash
+bun test
+```
+
+## Structure
+- `src/`: Source code
+- `dist/`: Built artifacts and types (generated)
+- `jsr.json`: JSR configuration
+- `vite.config.ts`: Vite build settings
+- `package.json`: Main project configuration
