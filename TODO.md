@@ -7,11 +7,11 @@
 - [x] Add basic Vite build config with declaration generation. [priority:medium]
 
 ## Next Steps: Snapcast + Butterchurn
-- [ ] Add `butterchurn` and `butterchurn-presets` dependencies. [priority:high]
-- [ ] Implement `SnapMessage` header parsing (38 bytes). [priority:high]
-- [ ] Create `SnapStream` client for WebSocket binary data. [priority:high]
+- [x] Add `butterchurn` and `butterchurn-presets` dependencies. [priority:high]
+- [x] Implement `SnapMessage` header parsing (38 bytes). [priority:high]
+- [x] Create `SnapStream` client for WebSocket binary data. [priority:high]
 - [ ] Setup `AudioContext` and connect it to Butterchurn. [priority:medium]
-- [ ] Implement PCM chunk decoding and playback sync. [priority:medium]
+- [/] Implement PCM chunk decoding and playback sync. [priority:medium]
 - [ ] Build basic UI with a canvas and stream selector. [priority:medium]
 - [x] Verify WebSocket port is 1780 (NOT 1705). [priority:high]
 - [x] Add anti-aliasing (AA) toggle to visualizer. [priority:medium]
