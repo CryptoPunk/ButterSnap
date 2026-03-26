@@ -17,7 +17,8 @@ const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement;
 const serverInput = document.getElementById('server-url') as HTMLInputElement;
 const statusText = document.getElementById('status') as HTMLElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-const presetText = document.getElementById('current-preset') as HTMLElement;
+const presetSelector = document.getElementById('preset-selector') as HTMLSelectElement;
+const shuffleBtn = document.getElementById('shuffle-btn') as HTMLButtonElement;
 const chunkCounter = document.getElementById('chunk-count') as HTMLElement;
 
 let chunksReceived = 0;
@@ -72,9 +73,32 @@ async function start() {
 
     const presets = butterchurnPresets.getPresets();
     const presetNames = Object.keys(presets);
+    
+    // Populate selector
+    presetSelector.innerHTML = '';
+    presetNames.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.text = name;
+      presetSelector.appendChild(option);
+    });
+
+    const loadPreset = (name: string, blend: number = 2.0) => {
+      visualizer.loadPreset(presets[name], blend);
+      presetSelector.value = name;
+    };
+
     const initialPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
-    visualizer.loadPreset(presets[initialPreset], 2.0);
-    presetText.innerText = initialPreset;
+    loadPreset(initialPreset, 0.0);
+
+    presetSelector.onchange = () => {
+      loadPreset(presetSelector.value, 1.0);
+    };
+
+    shuffleBtn.onclick = () => {
+      const randomPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
+      loadPreset(randomPreset, 1.5);
+    };
 
     const loop = () => {
       visualizer.render();
@@ -85,8 +109,7 @@ async function start() {
     // Auto-cycle presets every 20 seconds
     setInterval(() => {
       const nextPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
-      visualizer.loadPreset(presets[nextPreset], 2.7);
-      presetText.innerText = nextPreset;
+      loadPreset(nextPreset, 2.7);
     }, 20000);
   }
 
