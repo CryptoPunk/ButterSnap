@@ -15,7 +15,11 @@
     "composite": true,
     "allowSyntheticDefaultImports": true,
     "lib": ["ESNext", "DOM"],
-    "isolatedModules": true
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/types/*", "node_modules/*"]
+    }
   },
   "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "dist"]

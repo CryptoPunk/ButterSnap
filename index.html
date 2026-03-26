@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ButterSync - Snapcast & Butterchurn Integration</title>
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>ButterSync</h1>
+            <div class="controls">
+                <input type="text" id="server-url" value="http://localhost:1705" placeholder="Snapserver URL">
+                <button id="connect-btn">Connect</button>
+                <span id="status" class="status-disconnected">Disconnected</span>
+            </div>
+            <div class="preset-info">
+                Preset: <span id="current-preset">None</span>
+            </div>
+        </header>
+
+        <main>
+            <canvas id="canvas"></canvas>
+        </main>
+
+        <footer>
+            <div id="debug-info">
+                Latency: <span id="latency">0</span>ms | 
+                Chunks: <span id="chunk-count">0</span>
+            </div>
+        </footer>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

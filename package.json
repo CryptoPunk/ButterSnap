@@ -26,5 +26,9 @@
     "typescript": "^6.0.0-dev.20260324",
     "vite": "^6.2.0",
     "vite-plugin-dts": "^4.5.4"
+  },
+  "dependencies": {
+    "butterchurn": "^2.6.7",
+    "butterchurn-presets": "^2.4.7"
   }
 }

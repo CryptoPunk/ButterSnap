@@ -1,0 +1,149 @@
+import { SnapClient } from './client/SnapClient';
+import { PcmChunkMessage, CodecMessage, SampleFormat } from './protocol/SnapMessage';
+import butterchurn from 'butterchurn';
+import butterchurnPresets from 'butterchurn-presets';
+import './style.css';
+
+// Global State
+let audioContext: AudioContext | null = null;
+let visualizer: any = null;
+let client: SnapClient | null = null;
+let sampleFormat: SampleFormat = new SampleFormat();
+let lastChunkEnd = 0;
+let analyzer: AnalyserNode | null = null;
+
+// UI Selection
+const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement;
+const serverInput = document.getElementById('server-url') as HTMLInputElement;
+const statusText = document.getElementById('status') as HTMLElement;
+const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+const presetText = document.getElementById('current-preset') as HTMLElement;
+const chunkCounter = document.getElementById('chunk-count') as HTMLElement;
+
+let chunksReceived = 0;
+
+async function start() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    analyzer = audioContext.createAnalyser();
+    analyzer.fftSize = 2048;
+    // Base gain node to route audio
+    analyzer.connect(audioContext.destination);
+  }
+
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+
+  const url = serverInput.value.trim();
+  client = new SnapClient(url, audioContext);
+
+  client.addEventListener('stateChange', (e: any) => {
+    const state = e.detail;
+    statusText.innerText = state;
+    statusText.className = `status-${state.toLowerCase()}`;
+    connectBtn.innerText = state === 'CONNECTED' ? 'Disconnect' : 'Connect';
+  });
+
+  client.addEventListener('codec', (e: any) => {
+    const codec = e.detail as CodecMessage;
+    // For now we assume PCM 16-bit 48kHz but in a real app we'd parse the codec payload
+    console.log('Codec initialized:', codec.codec);
+  });
+
+  client.addEventListener('audio', (e: any) => {
+    const chunk = e.detail as PcmChunkMessage;
+    processAudioChunk(chunk);
+    chunksReceived++;
+    chunkCounter.innerText = chunksReceived.toString();
+  });
+
+  // Initialize Visualizer if needed
+  if (!visualizer) {
+    visualizer = butterchurn.createVisualizer(audioContext, canvas, {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      pixelRatio: window.devicePixelRatio || 1,
+      textureRatio: 1,
+    });
+
+    // Connect the analyzer to butterchurn
+    visualizer.connectAudio(analyzer);
+
+    const presets = butterchurnPresets.getPresets();
+    const presetNames = Object.keys(presets);
+    const initialPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
+    visualizer.loadPreset(presets[initialPreset], 2.0);
+    presetText.innerText = initialPreset;
+
+    const loop = () => {
+      visualizer.render();
+      requestAnimationFrame(loop);
+    };
+    loop();
+
+    // Auto-cycle presets every 20 seconds
+    setInterval(() => {
+      const nextPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
+      visualizer.loadPreset(presets[nextPreset], 2.7);
+      presetText.innerText = nextPreset;
+    }, 20000);
+  }
+
+  await client.connect();
+}
+
+function processAudioChunk(chunk: PcmChunkMessage) {
+  if (!audioContext || !analyzer) return;
+
+  const rate = sampleFormat.rate;
+  const channels = sampleFormat.channels;
+  const bits = sampleFormat.bits;
+  
+  const frameCount = chunk.payload.byteLength / sampleFormat.frameSize();
+  const buffer = audioContext.createBuffer(channels, frameCount, rate);
+
+  // Buffer conversion (standard 16-bit PCM)
+  const pcmData = new Int16Array(chunk.payload);
+  const left = buffer.getChannelData(0);
+  const right = buffer.getChannelData(1);
+
+  for (let i = 0; i < frameCount; i++) {
+    left[i] = pcmData[i * 2] / 32768;
+    right[i] = pcmData[i * 2 + 1] / 32768;
+  }
+
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(analyzer);
+
+  // Continuous scheduling
+  const now = audioContext.currentTime;
+  const startTime = Math.max(now, lastChunkEnd);
+  source.start(startTime);
+  lastChunkEnd = startTime + buffer.duration;
+  
+  // Latency visualization (approximation)
+  const latencyDisplay = document.getElementById('latency') as HTMLElement;
+  latencyDisplay.innerText = Math.round((startTime - now) * 1000).toString();
+}
+
+connectBtn.onclick = () => {
+  if (client && (statusText.innerText === 'CONNECTED' || statusText.innerText === 'CONNECTING')) {
+    client.disconnect();
+    statusText.innerText = 'DISCONNECTED';
+    statusText.className = 'status-disconnected';
+    connectBtn.innerText = 'Connect';
+  } else {
+    start().catch(console.error);
+  }
+};
+
+window.onresize = () => {
+  if (visualizer) {
+    visualizer.setOptions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }
+};

@@ -1,7 +1,4 @@
-/**
- * Snapcast Protocol Implementation
- * Based on official snapweb (https://github.com/snapcast/snapweb)
- */
+import { Tv } from './TimeProvider';
 
 export enum MessageType {
   Codec = 1,
@@ -9,25 +6,6 @@ export enum MessageType {
   ServerSettings = 3,
   Time = 4,
   Hello = 5,
-}
-
-export class Tv {
-  sec: number;
-  usec: number;
-
-  constructor(sec: number = 0, usec: number = 0) {
-    this.sec = sec;
-    this.usec = usec;
-  }
-
-  setMilliseconds(ms: number) {
-    this.sec = Math.floor(ms / 1000);
-    this.usec = Math.floor(ms * 1000) % 1000000;
-  }
-
-  getMilliseconds(): number {
-    return this.sec * 1000 + this.usec / 1000;
-  }
 }
 
 export class SampleFormat {
@@ -146,6 +124,45 @@ export class PcmChunkMessage extends SnapMessage {
     view.setUint32(34, this.payload.byteLength, true);
     const payloadUint8 = new Uint8Array(buffer, 38);
     payloadUint8.set(new Uint8Array(this.payload));
+    return buffer;
+  }
+}
+
+export class CodecMessage extends SnapMessage {
+  codec: string = "";
+  payload: ArrayBuffer = new ArrayBuffer(0);
+
+  constructor(buffer?: ArrayBuffer) {
+    super();
+    this.type = MessageType.Codec;
+    if (buffer) {
+      this.deserialize(buffer);
+    }
+  }
+
+  deserialize(buffer: ArrayBuffer) {
+    super.deserialize(buffer);
+    const view = new DataView(buffer);
+    const codecSize = view.getInt32(26, true);
+    const decoder = new TextDecoder("utf-8");
+    this.codec = decoder.decode(buffer.slice(30, 30 + codecSize));
+    const payloadSize = view.getInt32(30 + codecSize, true);
+    this.payload = buffer.slice(34 + codecSize, 34 + codecSize + payloadSize);
+  }
+
+  serialize(): ArrayBuffer {
+    const encoder = new TextEncoder();
+    const codecEncoded = encoder.encode(this.codec);
+    this.size = 26 + 4 + codecEncoded.length + 4 + this.payload.byteLength;
+    const buffer = new ArrayBuffer(this.size);
+    const view = new DataView(buffer);
+    this.serializeBase(view);
+    view.setInt32(26, codecEncoded.length, true);
+    const codecView = new Uint8Array(buffer, 30, codecEncoded.length);
+    codecView.set(codecEncoded);
+    view.setInt32(30 + codecEncoded.length, this.payload.byteLength, true);
+    const payloadView = new Uint8Array(buffer, 34 + codecEncoded.length);
+    payloadView.set(new Uint8Array(this.payload));
     return buffer;
   }
 }
