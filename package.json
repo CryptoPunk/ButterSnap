@@ -16,7 +16,7 @@
     "build": "vite build && bun x publint",
     "lint": "tsc --noEmit",
     "check": "publint",
-    "test": "bun test"
+    "test": "bun test src index.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
