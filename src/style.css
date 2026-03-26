@@ -129,18 +129,25 @@ footer {
   font-size: 0.9rem;
 }
 
-#preset-selector {
+#preset-selector, #scale-selector {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
-  max-width: 300px;
   outline: none;
   cursor: pointer;
 }
 
-#preset-selector:focus {
+#preset-selector {
+  max-width: 300px;
+}
+
+#scale-selector {
+  width: 80px;
+}
+
+#preset-selector:focus, #scale-selector:focus {
   border-color: var(--accent-secondary);
 }
 

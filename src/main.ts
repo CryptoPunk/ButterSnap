@@ -19,6 +19,7 @@ const statusText = document.getElementById('status') as HTMLElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const presetSelector = document.getElementById('preset-selector') as HTMLSelectElement;
 const shuffleBtn = document.getElementById('shuffle-btn') as HTMLButtonElement;
+const scaleSelector = document.getElementById('scale-selector') as HTMLSelectElement;
 const chunkCounter = document.getElementById('chunk-count') as HTMLElement;
 
 let chunksReceived = 0;
@@ -61,10 +62,11 @@ async function start() {
 
   // Initialize Visualizer if needed
   if (!visualizer) {
+    const scale = parseFloat(scaleSelector.value);
     visualizer = butterchurn.createVisualizer(audioContext, canvas, {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      pixelRatio: window.devicePixelRatio || 1,
+      width: canvas.clientWidth,
+      height: canvas.clientHeight,
+      pixelRatio: (window.devicePixelRatio || 1) * scale,
       textureRatio: 1,
     });
 
@@ -91,8 +93,21 @@ async function start() {
     const initialPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
     loadPreset(initialPreset, 0.0);
 
+    const updateVisualizerSize = () => {
+      const scale = parseFloat(scaleSelector.value);
+      visualizer.setOptions({
+        width: canvas.clientWidth,
+        height: canvas.clientHeight,
+        pixelRatio: (window.devicePixelRatio || 1) * scale,
+      });
+    };
+
     presetSelector.onchange = () => {
       loadPreset(presetSelector.value, 1.0);
+    };
+
+    scaleSelector.onchange = () => {
+      updateVisualizerSize();
     };
 
     shuffleBtn.onclick = () => {
@@ -111,6 +126,9 @@ async function start() {
       const nextPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
       loadPreset(nextPreset, 2.7);
     }, 20000);
+
+    // Update resize listener to use local function
+    window.onresize = updateVisualizerSize;
   }
 
   await client.connect();
@@ -166,11 +184,3 @@ connectBtn.onclick = () => {
   }
 };
 
-window.onresize = () => {
-  if (visualizer) {
-    visualizer.setOptions({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  }
-};
