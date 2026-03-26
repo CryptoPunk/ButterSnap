@@ -14,4 +14,5 @@
 - [ ] Implement PCM chunk decoding and playback sync. [priority:medium]
 - [ ] Build basic UI with a canvas and stream selector. [priority:medium]
 - [x] Verify WebSocket port is 1780 (NOT 1705). [priority:high]
+- [x] Add anti-aliasing (AA) toggle to visualizer. [priority:medium]
 - [ ] Fix `baseUrl` deprecation in `tsconfig.json` (TS 7.0 compatibility). [priority:low]
