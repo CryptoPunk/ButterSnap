@@ -21,3 +21,6 @@
 - [ ] Create `SnapClient` mock tests for WebSocket lifecycle and event multiplexing. [priority:medium]
 - [ ] Test UI-side JSON-RPC parsing for server status and stream selection. [priority:low]
 - [ ] Add e2e validation for audio/visualizer sync precision. [priority:low]
+- [ ] Add FLAC decoding support for high-fidelity lossless streams. [priority:medium]
+- [ ] Implement Opus decoder for low-latency, bandwidth-efficient streaming. [priority:high]
+- [ ] Add Vorbis codec support for legacy Snapcast configurations. [priority:low]
