@@ -19,10 +19,12 @@ export class SnapClient extends EventTarget {
   private state: SnapClientState = 'DISCONNECTED';
   private msgId: number = 0;
   private syncInterval: number | null = null;
+  private streamId: string | null = null;
 
-  constructor(private baseUrl: string, private audioContext?: AudioContext) {
+  constructor(private baseUrl: string, private audioContext?: AudioContext, streamId?: string) {
     super();
     this.timeProvider = new TimeProvider(audioContext);
+    this.streamId = streamId || null;
   }
 
   public async connect(): Promise<void> {
@@ -31,7 +33,13 @@ export class SnapClient extends EventTarget {
     this.state = 'CONNECTING';
     this.dispatchEvent(new CustomEvent('stateChange', { detail: this.state }));
 
-    const wsUrl = this.baseUrl.replace(/^http/, 'ws') + '/stream';
+    let wsUrl = this.baseUrl.replace(/^http/, 'ws');
+    if (wsUrl.endsWith('/')) wsUrl = wsUrl.slice(0, -1);
+    wsUrl += '/stream';
+    if (this.streamId) {
+      wsUrl += `?stream=${encodeURIComponent(this.streamId)}`;
+    }
+
     this.socket = new WebSocket(wsUrl);
     this.socket.binaryType = 'arraybuffer';
 

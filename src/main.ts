@@ -15,6 +15,8 @@ let meshScale = 10;
 // UI Selection
 const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement;
 const serverInput = document.getElementById('server-url') as HTMLInputElement;
+const loadStreamsBtn = document.getElementById('load-streams-btn') as HTMLButtonElement;
+const streamSelector = document.getElementById('stream-selector') as HTMLSelectElement;
 const statusText = document.getElementById('status') as HTMLElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const presetSelector = document.getElementById('preset-selector') as HTMLSelectElement;
@@ -39,7 +41,8 @@ async function start() {
   }
 
   const url = serverInput.value.trim();
-  client = new SnapClient(url, audioContext);
+  const selectedStreamId = streamSelector.value || undefined;
+  client = new SnapClient(url, audioContext, selectedStreamId);
 
   client.addEventListener('stateChange', (e: any) => {
     const state = e.detail;
@@ -204,6 +207,43 @@ connectBtn.onclick = () => {
     connectBtn.innerText = 'Connect';
   } else {
     start().catch(console.error);
+  }
+};
+
+loadStreamsBtn.onclick = async () => {
+  const url = serverInput.value.trim();
+  if (!url) return;
+
+  try {
+    loadStreamsBtn.disabled = true;
+    loadStreamsBtn.innerText = '...';
+    const response = await fetch(`${url}/jsonrpc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "Server.GetStatus"
+      })
+    });
+
+    const data = await response.json();
+    if (data.result && data.result.server && data.result.server.streams) {
+      const streams = data.result.server.streams;
+      streamSelector.innerHTML = '<option value="">Default Stream</option>';
+      streams.forEach((s: any) => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.text = s.uri ? (s.uri.query?.name || s.id) : s.id;
+        streamSelector.appendChild(option);
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load streams:', e);
+    statusText.innerText = 'Error loading streams';
+  } finally {
+    loadStreamsBtn.disabled = false;
+    loadStreamsBtn.innerText = 'List';
   }
 };
 

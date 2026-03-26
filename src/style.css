@@ -129,7 +129,7 @@ footer {
   font-size: 0.9rem;
 }
 
-#preset-selector, #scale-selector {
+#preset-selector, #scale-selector, #stream-selector {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
@@ -147,7 +147,24 @@ footer {
   width: 80px;
 }
 
-#preset-selector:focus, #scale-selector:focus {
+#stream-selector {
+  width: 150px;
+}
+
+#load-streams-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent-color);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+#load-streams-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-color);
+}
+
+#preset-selector:focus, #scale-selector:focus, #stream-selector:focus {
   border-color: var(--accent-secondary);
 }
 
