@@ -16,3 +16,8 @@
 - [x] Verify WebSocket port is 1780 (NOT 1705). [priority:high]
 - [x] Add anti-aliasing (AA) toggle to visualizer. [priority:medium]
 - [x] Fix `baseUrl` deprecation in `tsconfig.json` (TS 7.0 compatibility). [priority:low]
+- [ ] Expand `SnapMessage` test suite (coverage for all 5 message types and serialization). [priority:medium]
+- [ ] Add `TimeProvider` unit tests for server-local time sync and drift management. [priority:high]
+- [ ] Create `SnapClient` mock tests for WebSocket lifecycle and event multiplexing. [priority:medium]
+- [ ] Test UI-side JSON-RPC parsing for server status and stream selection. [priority:low]
+- [ ] Add e2e validation for audio/visualizer sync precision. [priority:low]
