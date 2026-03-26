@@ -4,4 +4,5 @@
 - [src/protocol/SnapMessage.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapMessage.ts) - binary protocol.
 - [src/client/SnapClient.ts](file:///Users/max/Projects/ButterSync/src/client/SnapClient.ts) - stream client.
 - [src/types/butterchurn.d.ts](file:///Users/max/Projects/ButterSync/src/types/butterchurn.d.ts) - typings.
+- [src/vite-env.d.ts](file:///Users/max/Projects/ButterSync/src/vite-env.d.ts) - Vite environment declarations.
 - [scripts/stream_audio.py](file:///Users/max/Projects/ButterSync/scripts/stream_audio.py) - Audio loop testing script.
