@@ -11,7 +11,7 @@ let client: SnapClient | null = null;
 let sampleFormat: SampleFormat = new SampleFormat();
 let lastChunkEnd = 0;
 let analyzer: AnalyserNode | null = null;
-
+let meshScale = 10;
 // UI Selection
 const connectBtn = document.getElementById('connect-btn') as HTMLButtonElement;
 const serverInput = document.getElementById('server-url') as HTMLInputElement;
@@ -20,6 +20,7 @@ const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const presetSelector = document.getElementById('preset-selector') as HTMLSelectElement;
 const shuffleBtn = document.getElementById('shuffle-btn') as HTMLButtonElement;
 const scaleSelector = document.getElementById('scale-selector') as HTMLSelectElement;
+const aaCheckbox = document.getElementById('aa-checkbox') as HTMLInputElement;
 const chunkCounter = document.getElementById('chunk-count') as HTMLElement;
 
 let chunksReceived = 0;
@@ -76,8 +77,8 @@ async function start() {
     );
 
     visualizer.setInternalMeshSize(
-      Math.ceil(truePixelWidth / 40),
-      Math.ceil(truePixelHeight / 40)
+      Math.ceil(truePixelWidth / meshScale),
+      Math.ceil(truePixelHeight / meshScale)
     );
 
     // Connect the analyzer to butterchurn
@@ -111,8 +112,8 @@ async function start() {
         {
           pixelRatio: (window.devicePixelRatio || 1),
           textureRatio: scale,
-          meshWidth: Math.ceil(truePixelWidth / 40),
-          meshHeight: Math.ceil(truePixelHeight / 40),
+          meshWidth: Math.ceil(truePixelWidth / meshScale),
+          meshHeight: Math.ceil(truePixelHeight / meshScale),
         }
 
       );
@@ -129,6 +130,10 @@ async function start() {
     shuffleBtn.onclick = () => {
       const randomPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
       loadPreset(randomPreset, 1.5);
+    };
+
+    aaCheckbox.onchange = () => {
+      visualizer.setOutputAA(aaCheckbox.checked);
     };
 
     const loop = () => {
