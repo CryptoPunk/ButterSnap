@@ -31,7 +31,7 @@ bun run build
 bun test
 ```
 
-ffmpeg -i song.mp3 -f s16le -acodec pcm_s16le -ar 48000 song.pcm
+ffmpeg -i song.mp3 -f s16le -stream_loop -acodec pcm_s16le -ar 48000 -
 snapserver -d -c ./snaptest.conf
 
 ## Structure
