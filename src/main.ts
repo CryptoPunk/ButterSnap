@@ -100,11 +100,15 @@ function processAudioChunk(chunk: PcmChunkMessage) {
   const channels = sampleFormat.channels;
   const bits = sampleFormat.bits;
   
-  const frameCount = chunk.payload.byteLength / sampleFormat.frameSize();
+  const frameCount = Math.floor(chunk.payload.byteLength / sampleFormat.frameSize());
+  if (frameCount === 0) return;
+  
   const buffer = audioContext.createBuffer(channels, frameCount, rate);
 
   // Buffer conversion (standard 16-bit PCM)
-  const pcmData = new Int16Array(chunk.payload);
+  // Ensure we don't have an odd byte length for Int16Array
+  const evenByteLength = chunk.payload.byteLength - (chunk.payload.byteLength % 2);
+  const pcmData = new Int16Array(chunk.payload, 0, evenByteLength / 2);
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
