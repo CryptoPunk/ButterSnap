@@ -144,4 +144,12 @@ export class SnapClient extends EventTarget {
   public disconnect() {
     this.socket?.close();
   }
+
+  public getServerTime(localTimeMs?: number): number {
+    return this.timeProvider.serverTime(localTimeMs || this.timeProvider.now());
+  }
+
+  public getLocalTime(serverTimeMs: number): number {
+    return this.timeProvider.localTime(serverTimeMs);
+  }
 }

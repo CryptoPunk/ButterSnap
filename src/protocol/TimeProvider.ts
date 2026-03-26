@@ -65,6 +65,10 @@ export class TimeProvider {
     return localTimeMs + this.diff;
   }
 
+  localTime(serverTimeMs: number): number {
+    return serverTimeMs - this.diff;
+  }
+
   serverNow(): number {
     return this.serverTime(this.now());
   }
