@@ -11,6 +11,9 @@ declare module 'butterchurn' {
     connectAudio(audioNode: AudioNode | AnalyserNode): void;
     loadPreset(preset: any, blendTime?: number): void;
     setOptions(options: VisualizerOptions): void;
+    setRendererSize(width: number, height: number, options: any): void;
+    setOutputAA(enabled: boolean): void;
+    setInternalMeshSize(width: number, height: number): void;
   }
 
   export function createVisualizer(
