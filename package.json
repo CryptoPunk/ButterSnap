@@ -1,12 +1,25 @@
 {
   "name": "buttersync",
-  "module": "index.ts",
+  "version": "0.1.0",
   "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && bun x publint",
+    "lint": "tsc --noEmit",
+    "check": "publint",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^24.0.0",
+    "publint": "^0.3.18",
+    "typescript": "^6.0.0-dev.20260324",
+    "vite": "^6.2.0"
   }
 }
