@@ -14,6 +14,7 @@ declare module 'butterchurn' {
     setRendererSize(width: number, height: number, options: any): void;
     setOutputAA(enabled: boolean): void;
     setInternalMeshSize(width: number, height: number): void;
+    loadExtraImages(images: { [key: string]: string }): Promise<void>;
   }
 
   export function createVisualizer(
