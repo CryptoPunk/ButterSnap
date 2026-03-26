@@ -12,7 +12,14 @@
 - Configuring Vite for modern distribution, ensuring compatibility with JSR/publint.
 
 ## Integration Plan: Snapcast + Butterchurn
-- **Snapcast Client**: Will utilize the Snapserver WebSocket API for JSON-RPC control and PCM audio streaming.
-- **Audio Processing**: Web Audio API will be used to manage the stream, providing the necessary `AudioNode` for visualization.
-- **Visualizer**: Butterchurn (WebGL implementation of Milkdrop) will consume the Snapcast audio stream using an `AnalyserNode`.
-- **Latency/Sync**: Initial focus will be on low-latency audio visualization; full multi-room synchronization logic from Snapweb may be simplified if visualization is the primary goal.
+- **Snapcast Client**:
+  - WebSocket connection to Snapserver.
+  - Binary Protocol: 38-byte header (16-bit type, 16-bit ID, time indices, 32-bit payload size).
+  - PCM Chunks (Type 4): Raw audio payload.
+  - Resampling sync: Client-side clock tracking and buffer management.
+- **Audio Processing**:
+  - Custom `AudioStream` class based on `snapweb` logic.
+  - Decode PCM and schedule playback in `AudioContext`.
+- **Visualizer**:
+  - `Butterchurn` connected to the final output node using `visualizer.connectAudio(node)`.
+  - Continuous `render()` loop synced with audio playback.

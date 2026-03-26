@@ -8,7 +8,8 @@
 
 ## Next Steps: Snapcast + Butterchurn
 - [ ] Add `butterchurn` and `butterchurn-presets` dependencies. [priority:high]
-- [ ] Create a WebSocket-based Snapcast client for audio streaming. [priority:high]
-- [ ] Implement audio decoding (likely PCM support first). [priority:medium]
-- [ ] Setup Butterchurn visualizer with a sample preset. [priority:medium]
-- [ ] Bridge Snapcast audio data to Butterchurn's `AnalyserNode`. [priority:high]
+- [ ] Implement `SnapMessage` header parsing (38 bytes). [priority:high]
+- [ ] Create `SnapStream` client for WebSocket binary data. [priority:high]
+- [ ] Setup `AudioContext` and connect it to Butterchurn. [priority:medium]
+- [ ] Implement PCM chunk decoding and playback sync. [priority:medium]
+- [ ] Build basic UI with a canvas and stream selector. [priority:medium]
