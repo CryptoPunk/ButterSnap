@@ -165,3 +165,18 @@ footer {
   background: var(--accent-secondary);
   color: #000;
 }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+#aa-checkbox {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent-secondary);
+}
