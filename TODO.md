@@ -13,3 +13,4 @@
 - [ ] Setup `AudioContext` and connect it to Butterchurn. [priority:medium]
 - [ ] Implement PCM chunk decoding and playback sync. [priority:medium]
 - [ ] Build basic UI with a canvas and stream selector. [priority:medium]
+- [x] Verify WebSocket port is 1780 (NOT 1705). [priority:high]

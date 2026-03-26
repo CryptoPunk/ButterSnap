@@ -1,10 +1,10 @@
-import { 
-  MessageType, 
-  HelloMessage, 
-  TimeMessage, 
-  PcmChunkMessage, 
-  CodecMessage, 
-  ServerSettingsMessage, 
+import {
+  MessageType,
+  HelloMessage,
+  TimeMessage,
+  PcmChunkMessage,
+  CodecMessage,
+  ServerSettingsMessage,
   SampleFormat,
   SnapMessage
 } from '../protocol/SnapMessage';
@@ -19,7 +19,7 @@ export class SnapClient extends EventTarget {
   private state: SnapClientState = 'DISCONNECTED';
   private msgId: number = 0;
   private syncInterval: number | null = null;
-  
+
   constructor(private baseUrl: string, private audioContext?: AudioContext) {
     super();
     this.timeProvider = new TimeProvider(audioContext);
@@ -27,7 +27,7 @@ export class SnapClient extends EventTarget {
 
   public async connect(): Promise<void> {
     if (this.state !== 'DISCONNECTED') return;
-    
+
     this.state = 'CONNECTING';
     this.dispatchEvent(new CustomEvent('stateChange', { detail: this.state }));
 
@@ -57,7 +57,7 @@ export class SnapClient extends EventTarget {
       ID: this.getUuid(),
       SnapStreamProtocolVersion: 2,
     };
-    
+
     this.sendMessage(hello);
     this.startSync();
   }

@@ -31,6 +31,9 @@ bun run build
 bun test
 ```
 
+ffmpeg -i song.mp3 -f s16le -acodec pcm_s16le -ar 48000 song.pcm
+snapserver -d -c ./snaptest.conf
+
 ## Structure
 - `src/`: Source code
 - `dist/`: Built artifacts and types (generated)

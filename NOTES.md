@@ -20,6 +20,9 @@
 - **Audio Processing**:
   - Custom `AudioStream` class based on `snapweb` logic.
   - Decode PCM and schedule playback in `AudioContext`.
-- **Visualizer**:
   - `Butterchurn` connected to the final output node using `visualizer.connectAudio(node)`.
   - Continuous `render()` loop synced with audio playback.
+
+## Troubleshooting
+- **Port Mismatch**: Snapserver uses port `1705` for raw TCP Control but port `1780` for HTTP/WebSocket traffic. Always connect the browser/web client to **port 1780**.
+- **Protocol Error**: Some Snapserver versions may reject specific subprotocol strings like `'binary'`. Standard `SnapClient` should use a default subprotocol.
