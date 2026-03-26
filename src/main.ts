@@ -156,7 +156,7 @@ async function start() {
 }
 
 function processAudioChunk(chunk: PcmChunkMessage) {
-  if (!audioContext || !analyzer) return;
+  if (!audioContext || !analyzer || !client) return;
 
   const rate = sampleFormat.rate;
   const channels = sampleFormat.channels;
@@ -183,15 +183,17 @@ function processAudioChunk(chunk: PcmChunkMessage) {
   source.buffer = buffer;
   source.connect(analyzer);
 
-  // Continuous scheduling
-  const now = audioContext.currentTime;
-  const startTime = Math.max(now, lastChunkEnd);
+  // Precise scheduling using server timestamp
+  const serverTime = chunk.timestamp.getMilliseconds();
+  const localTimeMs = client.getLocalTime(serverTime) + 200; // 200ms buffer
+  const startTime = Math.max(audioContext.currentTime, localTimeMs / 1000);
+
   source.start(startTime);
   lastChunkEnd = startTime + buffer.duration;
 
   // Latency visualization (approximation)
   const latencyDisplay = document.getElementById('latency') as HTMLElement;
-  latencyDisplay.innerText = Math.round((startTime - now) * 1000).toString();
+  latencyDisplay.innerText = Math.round((startTime - audioContext.currentTime) * 1000).toString();
 }
 
 connectBtn.onclick = () => {
