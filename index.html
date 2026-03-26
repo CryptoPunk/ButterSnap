@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ButterSync - Snapcast & Butterchurn Integration</title>
     <link rel="stylesheet" href="./src/style.css">
 </head>
+
 <body>
     <div id="app">
         <header>
@@ -16,13 +18,19 @@
                 <span id="status" class="status-disconnected">Disconnected</span>
             </div>
             <div class="preset-info">
-                Preset: <select id="preset-selector"><option>Loading...</option></select>
+                Preset: <select id="preset-selector">
+                    <option>Loading...</option>
+                </select>
                 <button id="shuffle-btn">Shuffle</button>
                 | Scale: <select id="scale-selector">
+                    <option value="0.125">0.125x</option>
+                    <option value="0.25">0.25x</option>
                     <option value="0.5">0.5x</option>
                     <option value="1" selected>1.0x</option>
                     <option value="1.5">1.5x</option>
                     <option value="2">2.0x</option>
+                    <option value="4">4.0x</option>
+                    <option value="8">8.0x</option>
                 </select>
             </div>
         </header>
@@ -33,11 +41,12 @@
 
         <footer>
             <div id="debug-info">
-                Latency: <span id="latency">0</span>ms | 
+                Latency: <span id="latency">0</span>ms |
                 Chunks: <span id="chunk-count">0</span>
             </div>
         </footer>
     </div>
     <script type="module" src="./src/main.ts"></script>
 </body>
+
 </html>

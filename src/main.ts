@@ -63,19 +63,29 @@ async function start() {
   // Initialize Visualizer if needed
   if (!visualizer) {
     const scale = parseFloat(scaleSelector.value);
-    visualizer = butterchurn.createVisualizer(audioContext, canvas, {
-      width: canvas.clientWidth,
-      height: canvas.clientHeight,
-      pixelRatio: (window.devicePixelRatio || 1) * scale,
-      textureRatio: 1,
-    });
+    let truePixelWidth = canvas.clientWidth * window.devicePixelRatio;
+    let truePixelHeight = canvas.clientHeight * window.devicePixelRatio;
+
+    visualizer = butterchurn.createVisualizer(audioContext, canvas,
+      {
+        width: canvas.clientWidth,
+        height: canvas.clientHeight,
+        pixelRatio: (window.devicePixelRatio || 1),
+        textureRatio: scale,
+      }
+    );
+
+    visualizer.setInternalMeshSize(
+      Math.ceil(truePixelWidth / 40),
+      Math.ceil(truePixelHeight / 40)
+    );
 
     // Connect the analyzer to butterchurn
     visualizer.connectAudio(analyzer);
 
     const presets = butterchurnPresets.getPresets();
     const presetNames = Object.keys(presets);
-    
+
     // Populate selector
     presetSelector.innerHTML = '';
     presetNames.forEach(name => {
@@ -95,11 +105,17 @@ async function start() {
 
     const updateVisualizerSize = () => {
       const scale = parseFloat(scaleSelector.value);
-      visualizer.setOptions({
-        width: canvas.clientWidth,
-        height: canvas.clientHeight,
-        pixelRatio: (window.devicePixelRatio || 1) * scale,
-      });
+      truePixelWidth = canvas.clientWidth * window.devicePixelRatio;
+      truePixelHeight = canvas.clientHeight * window.devicePixelRatio;
+      visualizer.setRendererSize(canvas.clientWidth, canvas.clientHeight,
+        {
+          pixelRatio: (window.devicePixelRatio || 1),
+          textureRatio: scale,
+          meshWidth: Math.ceil(truePixelWidth / 40),
+          meshHeight: Math.ceil(truePixelHeight / 40),
+        }
+
+      );
     };
 
     presetSelector.onchange = () => {
@@ -140,10 +156,10 @@ function processAudioChunk(chunk: PcmChunkMessage) {
   const rate = sampleFormat.rate;
   const channels = sampleFormat.channels;
   const bits = sampleFormat.bits;
-  
+
   const frameCount = Math.floor(chunk.payload.byteLength / sampleFormat.frameSize());
   if (frameCount === 0) return;
-  
+
   const buffer = audioContext.createBuffer(channels, frameCount, rate);
 
   // Buffer conversion (standard 16-bit PCM)
@@ -167,7 +183,7 @@ function processAudioChunk(chunk: PcmChunkMessage) {
   const startTime = Math.max(now, lastChunkEnd);
   source.start(startTime);
   lastChunkEnd = startTime + buffer.duration;
-  
+
   // Latency visualization (approximation)
   const latencyDisplay = document.getElementById('latency') as HTMLElement;
   latencyDisplay.innerText = Math.round((startTime - now) * 1000).toString();
