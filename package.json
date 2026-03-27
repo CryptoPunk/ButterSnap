@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"bun run serve:snap\"",
     "build": "vite build && bun x publint",
     "lint": "tsc --noEmit",
     "check": "publint",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.0.0",
+    "concurrently": "^9.2.1",
     "esbuild": "^0.27.4",
     "publint": "^0.3.18",
     "typescript": "^6.0.0-dev.20260324",

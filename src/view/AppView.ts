@@ -71,7 +71,7 @@ export class AppView {
     this.visualizer = butterchurn.createVisualizer(audioContext, this.canvas, {
       width: this.canvas.clientWidth,
       height: this.canvas.clientHeight,
-      pixelRatio: window.devicePixelRatio || 1,
+      pixelRatio: (window.devicePixelRatio * 2) || 1,
       textureRatio: scale,
     });
 
@@ -108,13 +108,13 @@ export class AppView {
 
   private resizeVisualizer() {
     if (!this.visualizer) return;
-    const scale = parseFloat(this.scaleSelector.value);
-    const trueWidth = this.canvas.clientWidth * window.devicePixelRatio;
-    const trueHeight = this.canvas.clientHeight * window.devicePixelRatio;
-    const meshScale = 10; // Copied from main.ts
-
+    let scale = parseFloat(this.scaleSelector.value);
+    let trueWidth = this.canvas.clientWidth * window.devicePixelRatio;
+    let trueHeight = this.canvas.clientHeight * window.devicePixelRatio;
+    let meshScale = 10; // Copied from main.ts
+    console.log("trueWidth", trueWidth, "trueHeight", trueHeight, "scale", scale, "pixelRatio", window.devicePixelRatio);
     this.visualizer.setRendererSize(this.canvas.clientWidth, this.canvas.clientHeight, {
-      pixelRatio: window.devicePixelRatio || 1,
+      pixelRatio: (window.devicePixelRatio * 2) || 1,
       textureRatio: scale,
       meshWidth: Math.ceil(trueWidth / meshScale),
       meshHeight: Math.ceil(trueHeight / meshScale),

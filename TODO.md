@@ -15,9 +15,9 @@
 - [ ] Add FLAC decoding support for high-fidelity lossless streams. [priority:high]
 - [ ] Implement Opus decoder for low-latency, bandwidth-efficient streaming. [priority:high]
 - [ ] Add Vorbis codec support for legacy Snapcast configurations. [priority:low]
-- [ ] Implement `Client` JSON-RPC commands: `SetVolume`, `SetLatency`, `SetName`, `DeleteClient`. [priority:medium]
-- [ ] Implement `Group` JSON-RPC commands: `SetMute`, `SetStream`, `SetClients`, `SetName`. [priority:low]
-- [ ] Implement `Stream` JSON-RPC commands: `Control`, `SetProperty`, `AddStream`, `RemoveStream`. [priority:medium]
+- [x] Implement `Client` JSON-RPC commands: `SetVolume`, `SetLatency`, `SetName`, `DeleteClient`. [priority:medium]
+- [x] Implement `Group` JSON-RPC commands: `SetMute`, `SetStream`, `SetClients`, `SetName`. [priority:low]
+- [x] Implement `Stream` JSON-RPC commands: `Control`, `SetProperty`, `AddStream`, `RemoveStream`. [priority:medium]
 
 ## Views (UI & Rendering)
 - [ ] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
