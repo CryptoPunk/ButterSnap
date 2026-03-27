@@ -91,30 +91,45 @@ export class AppController {
     // For simplicity, let's keep the random logic in view or here.
   }
 
-  private processAudioChunk(chunk: PcmChunkMessage) {
+  private processAudioChunk(data: any) {
     if (!this.audioContext || !this.analyzer || !this.client) return;
 
-    const rate = this.sampleFormat.rate;
-    const channels = this.sampleFormat.channels;
-    const frameCount = Math.floor(chunk.payload.byteLength / this.sampleFormat.frameSize());
-    if (frameCount === 0) return;
+    let buffer: AudioBuffer;
+    let serverTime: number;
 
-    const buffer = this.audioContext.createBuffer(channels, frameCount, rate);
-    const evenByteLength = chunk.payload.byteLength - (chunk.payload.byteLength % 2);
-    const pcmData = new Int16Array(chunk.payload, 0, evenByteLength / 2);
-    const left = buffer.getChannelData(0);
-    const right = buffer.getChannelData(1);
+    if (data.channelData) {
+      // Data is already decoded (e.g. from FLAC/Opus WASM)
+      const channels = data.channelData.length;
+      const samples = data.samples;
+      buffer = this.audioContext.createBuffer(channels, samples, this.sampleFormat.rate);
+      for (let i = 0; i < channels; i++) {
+        buffer.getChannelData(i).set(data.channelData[i]);
+      }
+      serverTime = data.timestamp.getMilliseconds();
+    } else {
+      // Data is raw PCM from PcmChunkMessage
+      const chunk = data as PcmChunkMessage;
+      const rate = this.sampleFormat.rate;
+      const channels = this.sampleFormat.channels;
+      const frameCount = Math.floor(chunk.payload.byteLength / this.sampleFormat.frameSize());
+      if (frameCount === 0) return;
 
-    for (let i = 0; i < frameCount; i++) {
-      left[i] = pcmData[i * 2] / 32768;
-      right[i] = pcmData[i * 2 + 1] / 32768;
+      buffer = this.audioContext.createBuffer(channels, frameCount, rate);
+      const evenByteLength = chunk.payload.byteLength - (chunk.payload.byteLength % 2);
+      const pcmData = new Int16Array(chunk.payload, 0, evenByteLength / 2);
+      
+      for (let i = 0; i < frameCount; i++) {
+        for (let ch = 0; ch < channels; ch++) {
+          buffer.getChannelData(ch)[i] = pcmData[i * channels + ch] / 32768;
+        }
+      }
+      serverTime = chunk.timestamp.getMilliseconds();
     }
 
     const source = this.audioContext.createBufferSource();
     source.buffer = buffer;
     source.connect(this.analyzer);
 
-    const serverTime = chunk.timestamp.getMilliseconds();
     const localTimeMs = this.client.getLocalTime(serverTime) + 200;
     const startTime = Math.max(this.audioContext.currentTime, localTimeMs / 1000);
 

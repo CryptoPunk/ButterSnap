@@ -9,6 +9,9 @@ import {
   SnapMessage
 } from '../protocol/SnapMessage';
 import { TimeProvider, Tv } from '../protocol/TimeProvider';
+import { FLACDecoder } from '@wasm-audio-decoders/flac';
+import { OpusMLDecoder } from '@wasm-audio-decoders/opus-ml';
+import { OggVorbisDecoder } from '@wasm-audio-decoders/ogg-vorbis';
 
 export type SnapClientState = 'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'ERROR';
 
@@ -20,6 +23,8 @@ export class SnapClient extends EventTarget {
   private msgId: number = 0;
   private syncInterval: number | null = null;
   private streamId: string | null = null;
+  private decoder: any = null;
+  private codec: string = 'pcm';
 
   constructor(private baseUrl: string, private audioContext?: AudioContext, streamId?: string) {
     super();
@@ -78,23 +83,57 @@ export class SnapClient extends EventTarget {
     this.startSync();
   }
 
-  private handleMessage(ev: MessageEvent) {
+  private async handleMessage(ev: MessageEvent) {
     const buffer = ev.data as ArrayBuffer;
     const view = new DataView(buffer);
     const type = view.getUint16(0, true) as MessageType;
 
     switch (type) {
       case MessageType.Codec:
-        const codec = new CodecMessage(buffer);
-        console.log('Codec received:', codec.codec);
-        // In a real implementation, we would initialize a decoder here.
-        // For ButterSync, we'll assume PCM if possible or implement a decoder later.
-        this.dispatchEvent(new CustomEvent('codec', { detail: codec }));
+        const codecMsg = new CodecMessage(buffer);
+        this.codec = codecMsg.codec;
+        console.log('Codec received:', this.codec);
+        
+        // Finalize old decoder
+        if (this.decoder) {
+          this.decoder.free();
+          this.decoder = null;
+        }
+
+        if (this.codec === 'flac') {
+          this.decoder = new FLACDecoder();
+          await this.decoder.ready;
+        } else if (this.codec === 'opus') {
+          this.decoder = new OpusMLDecoder();
+          await this.decoder.ready;
+        } else if (this.codec === 'ogg' || this.codec === 'vorbis') {
+          this.decoder = new OggVorbisDecoder();
+          await this.decoder.ready;
+        }
+
+        this.dispatchEvent(new CustomEvent('codec', { detail: codecMsg }));
         break;
 
       case MessageType.PcmChunk:
         const pcm = new PcmChunkMessage(buffer);
-        this.dispatchEvent(new CustomEvent('audio', { detail: pcm }));
+        if (this.decoder) {
+          try {
+            const decoded = await this.decoder.decode(new Uint8Array(pcm.payload));
+            if (decoded && decoded.channelData) {
+              // Emit decoded audio data
+              this.dispatchEvent(new CustomEvent('audio', { detail: { 
+                timestamp: pcm.timestamp, 
+                channelData: decoded.channelData,
+                samples: decoded.samplesDecoded
+              } }));
+            }
+          } catch (err) {
+            console.error('Decoding error:', err);
+          }
+        } else {
+          // Raw PCM
+          this.dispatchEvent(new CustomEvent('audio', { detail: pcm }));
+        }
         break;
 
       case MessageType.Time:
