@@ -83,6 +83,66 @@ export class SnapControlClient extends EventTarget {
     });
   }
 
+  // Server Commands
+  public async getStatus(): Promise<any> {
+    return this.sendRequest('Server.GetStatus');
+  }
+
+  public async getRPCVersion(): Promise<any> {
+    return this.sendRequest('Server.GetRPCVersion');
+  }
+
+  // Client Commands
+  public async setClientVolume(id: string, percent: number, muted = false): Promise<any> {
+    return this.sendRequest('Client.SetVolume', { id, volume: { percent, muted } });
+  }
+
+  public async setClientLatency(id: string, latency: number): Promise<any> {
+    return this.sendRequest('Client.SetLatency', { id, latency });
+  }
+
+  public async setClientName(id: string, name: string): Promise<any> {
+    return this.sendRequest('Client.SetName', { id, name });
+  }
+
+  public async deleteClient(id: string): Promise<any> {
+    return this.sendRequest('Server.DeleteClient', { id });
+  }
+
+  // Group Commands
+  public async setGroupMute(id: string, mute: boolean): Promise<any> {
+    return this.sendRequest('Group.SetMute', { id, mute });
+  }
+
+  public async setGroupStream(id: string, stream_id: string): Promise<any> {
+    return this.sendRequest('Group.SetStream', { id, stream_id });
+  }
+
+  public async setGroupClients(id: string, clients: string[]): Promise<any> {
+    return this.sendRequest('Group.SetClients', { id, clients });
+  }
+
+  public async setGroupName(id: string, name: string): Promise<any> {
+    return this.sendRequest('Group.SetName', { id, name });
+  }
+
+  // Stream Commands
+  public async controlStream(id: string, command: string, params: any = {}): Promise<any> {
+    return this.sendRequest('Stream.Control', { id, command, params });
+  }
+
+  public async setStreamProperty(id: string, property: string, value: any): Promise<any> {
+    return this.sendRequest('Stream.SetProperty', { id, property, value });
+  }
+
+  public async addStream(streamUri: string): Promise<any> {
+    return this.sendRequest('Stream.AddStream', { streamUri });
+  }
+
+  public async removeStream(id: string): Promise<any> {
+    return this.sendRequest('Stream.RemoveStream', { id });
+  }
+
   public disconnect() {
     this.socket?.close();
   }
