@@ -23,6 +23,7 @@
 - [ ] Build interactive playback UI (play, pause, next, previous) connected to `Stream.Control`. [priority:medium]
 - [ ] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
 - [ ] Add visualizer "Power Mode" toggle (high-DPI / AA scaling). [priority:low]
+- [ ] Implement Fullscreen mode for the visualizer canvas (F key / UI button). [priority:medium]
 
 ## Controller (Flow & Integration)
 - [ ] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]

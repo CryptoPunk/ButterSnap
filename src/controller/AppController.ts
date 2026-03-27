@@ -12,17 +12,52 @@ export class AppController {
   private sampleFormat: SampleFormat = new SampleFormat();
   private lastChunkEnd = 0;
   private chunksReceivedCount = 0;
+  private playbackStatus: 'playing' | 'paused' | 'stopped' = 'stopped';
+  private currentStreamId: string | null = null;
 
   constructor() {
     this.view = new AppView({
       onConnect: (url, streamId) => this.handleConnect(url, streamId),
       onDisconnect: () => this.handleDisconnect(),
       onLoadStreams: (url) => this.handleLoadStreams(url),
-      onPresetChange: (name) => this.view.loadPreset(name),
+      onPresetChange: (name) => {
+        this.view.loadPreset(name);
+        this.saveSettings();
+      },
       onShuffle: () => this.handleShuffle(),
-      onScaleChange: (scale) => {}, // Logic handled in view resize
-      onAaToggle: (enabled) => this.view.setAA(enabled),
+      onScaleChange: (scale) => this.saveSettings(),
+      onAaToggle: (enabled) => {
+        this.view.setAA(enabled);
+        this.saveSettings();
+      },
     });
+
+    this.loadSettings();
+    this.initMediaSession();
+  }
+
+  private loadSettings() {
+    const saved = localStorage.getItem('buttersync-settings');
+    if (saved) {
+      try {
+        const settings = JSON.parse(saved);
+        this.view.setServerUrl(settings.serverUrl || 'http://localhost:1780');
+        if (settings.aa !== undefined) this.view.setAA(settings.aa);
+        if (settings.scale !== undefined) this.view.setScale(settings.scale);
+        // We don't auto-connect, but we prepare the UI.
+      } catch (e) {
+        console.error('Failed to load settings', e);
+      }
+    }
+  }
+
+  private saveSettings() {
+    const settings = {
+      serverUrl: this.view.getServerUrl(),
+      aa: this.view.getAA(),
+      scale: this.view.getScale(),
+    };
+    localStorage.setItem('buttersync-settings', JSON.stringify(settings));
   }
 
   private async handleConnect(url: string, streamId?: string) {
@@ -37,6 +72,8 @@ export class AppController {
     if (this.audioContext.state === 'suspended') {
       await this.audioContext.resume();
     }
+
+    this.currentStreamId = streamId || null;
 
     if (this.client) this.client.disconnect();
     this.client = new SnapClient(url, this.audioContext, streamId);
@@ -71,17 +108,98 @@ export class AppController {
       if (!this.controlClient || this.controlClient.baseUrl !== url) {
         if (this.controlClient) this.controlClient.disconnect();
         this.controlClient = new SnapControlClient(url);
+        
+        this.controlClient.addEventListener('notification', (e: any) => {
+          this.handleNotification(e.detail);
+        });
+
         await this.controlClient.connect();
       }
 
-      const data = await this.controlClient.sendRequest('Server.GetStatus');
-      if (data.server && data.server.streams) {
-        this.view.updateStreams(data.server.streams);
+      this.saveSettings();
+      const status = await this.controlClient.getStatus();
+      if (status.server && status.server.streams) {
+        this.view.updateStreams(status.server.streams);
       }
     } catch (e) {
       console.error('Failed to load streams', e);
     } finally {
       this.view.setLoadStreamsLoading(false);
+    }
+  }
+
+  private handleNotification(note: any) {
+    console.log('Notification received:', note.method, note.params);
+    switch (note.method) {
+      case 'Stream.OnUpdate':
+        if (note.params.id === this.currentStreamId) {
+          const stream = note.params.stream;
+          if (stream.metadata) this.updateMediaMetadata(stream.metadata);
+          if (stream.properties) this.updatePlaybackState(stream.properties.playbackStatus);
+        }
+        break;
+      case 'Stream.OnProperties':
+        // Old versions or different events might use this
+        if (note.params.id === this.currentStreamId) {
+          if (note.params.metadata) this.updateMediaMetadata(note.params.metadata);
+          if (note.params.playbackStatus) this.updatePlaybackState(note.params.playbackStatus);
+        }
+        break;
+      case 'Server.OnUpdate':
+        this.handleLoadStreams(this.view.getServerUrl());
+        break;
+    }
+  }
+
+  private initMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (this.controlClient && this.currentStreamId) {
+        this.controlClient.controlStream(this.currentStreamId, 'play');
+      }
+    });
+
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (this.controlClient && this.currentStreamId) {
+        this.controlClient.controlStream(this.currentStreamId, 'pause');
+      }
+    });
+
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      if (this.controlClient && this.currentStreamId) {
+        this.controlClient.controlStream(this.currentStreamId, 'next');
+      }
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      if (this.controlClient && this.currentStreamId) {
+        this.controlClient.controlStream(this.currentStreamId, 'previous');
+      }
+    });
+  }
+
+  private updateMediaMetadata(metadata?: any) {
+    if (!metadata || !('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: metadata.title || 'Live Stream',
+      artist: metadata.artist?.join(', ') || 'Snapcast',
+      album: metadata.album || '',
+      artwork: metadata.artUrl ? [{ src: metadata.artUrl }] : []
+    });
+  }
+
+  private updatePlaybackState(status: 'playing' | 'paused' | 'stopped') {
+    this.playbackStatus = status;
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : 'paused';
+    }
+
+    if (status === 'playing') {
+      this.view.resumeLoop();
+    } else {
+      this.view.stopLoop();
     }
   }
 

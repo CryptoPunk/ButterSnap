@@ -81,11 +81,31 @@ export class AppView {
     const initial = presetNames[Math.floor(Math.random() * presetNames.length)];
     this.loadPreset(initial, 0);
 
+    this.startLoop();
+  }
+
+  private loopActive = false;
+  private startLoop() {
+    if (this.loopActive) return;
+    this.loopActive = true;
     const loop = () => {
-      this.visualizer.render();
+      if (!this.loopActive) return;
+      if (this.visualizer) {
+        this.visualizer.render();
+      }
       requestAnimationFrame(loop);
     };
     loop();
+  }
+
+  public stopLoop() {
+    this.loopActive = false;
+  }
+
+  public resumeLoop() {
+    if (this.visualizer) {
+      this.startLoop();
+    }
   }
 
   public loadPreset(name: string, blend = 2.0) {
@@ -152,5 +172,26 @@ export class AppView {
       this.visualizer.setOutputAA(enabled);
     }
     this.aaCheckbox.checked = enabled;
+  }
+
+  public getAA(): boolean {
+    return this.aaCheckbox.checked;
+  }
+
+  public setScale(scale: number) {
+    this.scaleSelector.value = scale.toString();
+    this.resizeVisualizer();
+  }
+
+  public getScale(): number {
+    return parseFloat(this.scaleSelector.value);
+  }
+
+  public setServerUrl(url: string) {
+    this.serverInput.value = url;
+  }
+
+  public getServerUrl(): string {
+    return this.serverInput.value.trim();
   }
 }
