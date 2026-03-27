@@ -81,7 +81,16 @@ export class AppView {
     const initial = presetNames[Math.floor(Math.random() * presetNames.length)];
     this.loadPreset(initial, 0);
 
+    this.loadDefaultTextures();
     this.startLoop();
+  }
+
+  private loadDefaultTextures() {
+    if (!this.visualizer) return;
+    this.visualizer.loadExtraImages({
+      'texture1': '/textures/texture1.png',
+      'texture2': '/textures/texture2.png',
+    });
   }
 
   private loopActive = false;
@@ -112,6 +121,12 @@ export class AppView {
     if (this.visualizer && this.presets[name]) {
       this.visualizer.loadPreset(this.presets[name], blend);
       this.presetSelector.value = name;
+    }
+  }
+
+  public loadExtraImages(imageMap: { [key: string]: string }) {
+    if (this.visualizer) {
+      this.visualizer.loadExtraImages(imageMap);
     }
   }
 

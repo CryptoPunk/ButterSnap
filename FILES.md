@@ -13,3 +13,4 @@
 - [src/vite-env.d.ts](file:///Users/max/Projects/ButterSync/src/vite-env.d.ts) - Vite environment declarations.
 - [scripts/stream_audio.py](file:///Users/max/Projects/ButterSync/scripts/stream_audio.py) - Audio loop testing script.
 - [docs/](file:///Users/max/Projects/ButterSync/docs/) - Snapcast API documentation and references.
+- [public/textures/](file:///Users/max/Projects/ButterSync/public/textures/) - Custom textures for visualizer presets.
