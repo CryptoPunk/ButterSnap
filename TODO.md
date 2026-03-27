@@ -31,4 +31,4 @@
 - [ ] Tie Snapcast Control API together with browser **Media Session API** (metadata/headset controls). [priority:high]
 - [ ] Persist application settings (Server URL, last Stream, AA toggle, scale) in `localStorage`. [priority:low]
 - [ ] Add e2e validation for audio/visualizer sync precision across network latencies. [priority:low]
-- [ ] Automate `snapserver` lifecycle for development and integration testing (launch server with `snaptest.conf`). [priority:medium]
+- [x] Automate `snapserver` lifecycle for development and integration testing (launch server with `snaptest.conf`). [priority:medium]

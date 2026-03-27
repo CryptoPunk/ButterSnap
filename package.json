@@ -16,7 +16,8 @@
     "build": "vite build && bun x publint",
     "lint": "tsc --noEmit",
     "check": "publint",
-    "test": "bun test src index.test.ts"
+    "test": "bun test src index.test.ts",
+    "serve:snap": "snapserver -c snaptest.conf"
   },
   "devDependencies": {
     "@types/bun": "latest",
