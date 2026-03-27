@@ -28,7 +28,10 @@ class SnapPlugin:
             "metadata": {
                 "title": "Initial Track",
                 "artist": ["Snap Plugin"],
-                "album": "Instrumental"
+                "album": "Instrumental",
+                "albumArtist": ["Various Artists"],
+                "duration": 300.0,
+                "artUrl": ""
             }
         }
         self.lock = threading.Lock()
@@ -55,11 +58,23 @@ class SnapPlugin:
         sys.stdout.flush()
 
     def log(self, message, severity="Info"):
+        # severity: trace, debug, info, notice, warning, error, fatal
         self.send_notification("Plugin.Stream.Log", {"severity": severity, "message": message})
 
     def notify_properties(self):
         with self.lock:
+            # Send the complete state for consistency in testing
             self.send_notification("Plugin.Stream.Player.Properties", self.state)
+
+    def heartbeat_loop(self):
+        """Increments position when playing and sends periodic updates"""
+        while True:
+            time.sleep(1.0)
+            with self.lock:
+                if self.state["playbackStatus"] == "playing":
+                    self.state["position"] += 1.0
+                    # Notify property change (position)
+                    self.notify_properties()
 
     def handle_request(self, req):
         if req.get("jsonrpc") != "2.0":
@@ -75,20 +90,37 @@ class SnapPlugin:
                 self.send_response(req_id, self.state)
         elif method == "Plugin.Stream.Player.Control":
             cmd = params.get("command")
-            self.log(f"Received control command: {cmd}")
-            if cmd == "play": self.state["playbackStatus"] = "playing"
-            elif cmd == "pause": self.state["playbackStatus"] = "paused"
-            elif cmd == "stop": self.state["playbackStatus"] = "stopped"
+            p = params.get("params", {})
+            self.log(f"Received control command: {cmd}", "Notice")
+            
+            with self.lock:
+                if cmd == "play": self.state["playbackStatus"] = "playing"
+                elif cmd == "pause": self.state["playbackStatus"] = "paused"
+                elif cmd == "playPause":
+                    self.state["playbackStatus"] = "paused" if self.state["playbackStatus"] == "playing" else "playing"
+                elif cmd == "stop": self.state["playbackStatus"] = "stopped"
+                elif cmd == "next": self.log("Next track requested", "Notice")
+                elif cmd == "previous": self.log("Previous track requested", "Notice")
+                elif cmd == "seek":
+                    offset = p.get("offset", 0)
+                    self.state["position"] += offset
+                elif cmd == "setPosition":
+                    self.state["position"] = p.get("position", 0)
             
             self.send_response(req_id, "ok")
             self.notify_properties()
         elif method == "Plugin.Stream.Player.SetProperty":
+            self.log(f"SetProperty: {params}", "Notice")
+            properties_changed = False
             with self.lock:
                 for k, v in params.items():
                     if k in self.state:
                         self.state[k] = v
+                        properties_changed = True
+            
             self.send_response(req_id, "ok")
-            self.notify_properties()
+            if properties_changed:
+                self.notify_properties()
         else:
             self.log(f"Unknown method: {method}", "Warning")
             self.send_response(req_id, error={"code": -32601, "message": "Method not found"})
@@ -96,9 +128,11 @@ class SnapPlugin:
     def run(self):
         # Notify server we are ready
         self.send_notification("Plugin.Stream.Ready", {})
+        self.log("Plugin interface ready and starting heartbeat loop", "Notice")
         
-        # Start IPC listener for instrumentation
+        # Start background tasks
         threading.Thread(target=self.ipc_listener, daemon=True).start()
+        threading.Thread(target=self.heartbeat_loop, daemon=True).start()
 
         for line in sys.stdin:
             line = line.strip()
@@ -140,21 +174,47 @@ class SnapPlugin:
 def command_mode():
     import argparse
     parser = argparse.ArgumentParser(description="Instrument the running Snap Plugin")
-    parser.add_argument("--title", help="Set track title")
-    parser.add_argument("--artist", help="Set track artist")
-    parser.add_argument("--status", choices=['playing', 'paused', 'stopped'], help="Set playback status")
+    parser.add_argument("--host", default="localhost", help="Snapcast host")
+    parser.add_argument("--port", type=int, default=1780, help="Snapcast port")
+    
+    subparsers = parser.add_subparsers(dest="command")
+    
+    # Metadata command
+    meta = subparsers.add_parser("metadata")
+    meta.add_argument("--title", help="Track Title")
+    meta.add_argument("--artist", help="Track Artist")
+    meta.add_argument("--album", help="Album Name")
+    meta.add_argument("--duration", type=float, help="Duration in seconds")
+    meta.add_argument("--art", help="Album Art URL")
+    
+    # Status command
+    status = subparsers.add_parser("status")
+    status.add_argument("value", choices=['playing', 'paused', 'stopped'])
+    
+    # Props command (raw)
+    props = subparsers.add_parser("props")
+    props.add_argument("json", help="Raw JSON properties")
+
     args = parser.parse_args()
+    if not args.command and not sys.argv[1:]:
+        parser.print_help()
+        return
 
     cmd = {}
-    if args.title or args.artist:
+    if args.command == "metadata":
         cmd["metadata"] = {}
         if args.title: cmd["metadata"]["title"] = args.title
         if args.artist: cmd["metadata"]["artist"] = [args.artist]
-    if args.status:
-        cmd["status"] = args.status
-
+        if args.album: cmd["metadata"]["album"] = args.album
+        if args.duration: cmd["metadata"]["duration"] = args.duration
+        if args.art: cmd["metadata"]["artUrl"] = args.art
+    elif args.command == "status":
+        cmd["status"] = args.value
+    elif args.command == "props":
+        cmd["properties"] = json.loads(args.json)
+    
     if not cmd:
-        print("No commands specified.")
+        # Fallback for old simple-arg mode if needed, but let's stick to subparsers
         return
 
     try:
