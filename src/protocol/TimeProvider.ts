@@ -44,17 +44,13 @@ export class TimeProvider {
   }
 
   setDiff(c2s: number, s2c: number) {
-    if (this.now() === 0) {
-      this.reset();
-    } else {
-      const currentDiff = (c2s - s2c) / 2;
-      this.diffBuffer.push(currentDiff);
-      if (this.diffBuffer.length > 100) {
-        this.diffBuffer.shift();
-      }
-      const sorted = [...this.diffBuffer].sort((a, b) => a - b);
-      this.diff = sorted[Math.floor(sorted.length / 2)];
+    const currentDiff = (c2s - s2c) / 2;
+    this.diffBuffer.push(currentDiff);
+    if (this.diffBuffer.length > 100) {
+      this.diffBuffer.shift();
     }
+    const sorted = [...this.diffBuffer].sort((a, b) => a - b);
+    this.diff = sorted[Math.floor(sorted.length / 2)];
   }
 
   now(): number {

@@ -170,10 +170,12 @@ export class CodecMessage extends SnapMessage {
 export class JsonMessage extends SnapMessage {
   json: any;
 
-  constructor(buffer?: ArrayBuffer) {
+  constructor(data?: ArrayBuffer | any) {
     super();
-    if (buffer) {
-      this.deserialize(buffer);
+    if (data instanceof ArrayBuffer) {
+      this.deserialize(data);
+    } else if (data) {
+      this.json = data;
     }
   }
 
@@ -201,15 +203,15 @@ export class JsonMessage extends SnapMessage {
 }
 
 export class HelloMessage extends JsonMessage {
-  constructor(buffer?: ArrayBuffer) {
-    super(buffer);
+  constructor(data?: any) {
+    super(data);
     this.type = MessageType.Hello;
   }
 }
 
 export class ServerSettingsMessage extends JsonMessage {
-  constructor(buffer?: ArrayBuffer) {
-    super(buffer);
+  constructor(data?: any) {
+    super(data);
     this.type = MessageType.ServerSettings;
   }
 }

@@ -5,6 +5,8 @@
 - [src/style.css](file:///Users/max/Projects/ButterSync/src/style.css) - Premium UI styles.
 - [src/protocol/SnapMessage.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapMessage.ts) - binary protocol.
 - [src/protocol/SnapProperties.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapProperties.ts) - stream metadata and properties.
+- [src/protocol/TimeProvider.ts](file:///Users/max/Projects/ButterSync/src/protocol/TimeProvider.ts) - server-local clock sync.
+- [src/protocol/TimeProvider.test.ts](file:///Users/max/Projects/ButterSync/src/protocol/TimeProvider.test.ts) - sync tests.
 - [src/client/SnapClient.ts](file:///Users/max/Projects/ButterSync/src/client/SnapClient.ts) - stream client.
 - [src/client/SnapControlClient.ts](file:///Users/max/Projects/ButterSync/src/client/SnapControlClient.ts) - JSON-RPC control client.
 - [src/types/butterchurn.d.ts](file:///Users/max/Projects/ButterSync/src/types/butterchurn.d.ts) - typings.

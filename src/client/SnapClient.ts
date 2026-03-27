@@ -40,13 +40,21 @@ export class SnapClient extends EventTarget {
       wsUrl += `?stream=${encodeURIComponent(this.streamId)}`;
     }
 
-    this.socket = new WebSocket(wsUrl);
-    this.socket.binaryType = 'arraybuffer';
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(wsUrl);
+      this.socket.binaryType = 'arraybuffer';
 
-    this.socket.onopen = () => this.handleOpen();
-    this.socket.onmessage = (ev) => this.handleMessage(ev);
-    this.socket.onclose = () => this.handleClose();
-    this.socket.onerror = (ev) => this.handleError(ev);
+      this.socket.onopen = () => {
+        this.handleOpen();
+        resolve();
+      };
+      this.socket.onmessage = (ev) => this.handleMessage(ev);
+      this.socket.onclose = () => this.handleClose();
+      this.socket.onerror = (ev) => {
+        this.handleError(ev);
+        reject(ev);
+      };
+    });
   }
 
   private handleOpen() {
@@ -117,12 +125,12 @@ export class SnapClient extends EventTarget {
   }
 
   private startSync() {
-    this.syncInterval = window.setInterval(() => {
+    this.syncInterval = setInterval(() => {
       const syncMsg = new TimeMessage();
       syncMsg.sent = new Tv();
       syncMsg.sent.setMilliseconds(this.timeProvider.now());
       this.sendMessage(syncMsg);
-    }, 1000);
+    }, 1000) as unknown as number;
   }
 
   private stopSync() {
