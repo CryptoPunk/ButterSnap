@@ -32,3 +32,7 @@
 - [ ] Implement `Stream` commands: `Control` (Play/Pause/Seek), `SetProperty` (Volume/Mute). [priority:medium]
 - [ ] Implement `Stream` management: `AddStream`, `RemoveStream`. [priority:low]
 - [ ] Handle real-time Notifications from WebSocket: `Client.OnVolumeChanged`, `Group.OnStreamChanged`, `Stream.OnUpdate`. [priority:high]
+- [ ] Process `Stream.OnProperties` for rich metadata (track title, artist, album art display). [priority:medium]
+- [ ] Implement playback UI (play, pause, next, previous) using `Stream.Control`. [priority:medium]
+- [ ] Sync visualizer state with `playbackStatus` (auto-pause loop when stream is `stopped`). [priority:low]
+- [ ] Tie together Snapcast Control API with browser Media Session API (metadata/controls). [priority:medium]
