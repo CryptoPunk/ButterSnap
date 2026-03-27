@@ -5,8 +5,8 @@ import { PcmChunkMessage, SampleFormat } from '../protocol/SnapMessage';
 
 export class AppController {
   private view: AppView;
-  private client: SnapClient | null = null;
-  private controlClient: SnapControlClient | null = null;
+  public client: SnapClient | null = null;
+  public controlClient: SnapControlClient | null = null;
   private audioContext: AudioContext | null = null;
   private analyzer: AnalyserNode | null = null;
   private sampleFormat: SampleFormat = new SampleFormat();
@@ -134,15 +134,21 @@ export class AppController {
       case 'Stream.OnUpdate':
         if (note.params.id === this.currentStreamId) {
           const stream = note.params.stream;
-          if (stream.metadata) this.updateMediaMetadata(stream.metadata);
-          if (stream.properties) this.updatePlaybackState(stream.properties.playbackStatus);
+          const props = stream.properties || {};
+          if (stream.metadata) {
+            this.updateMediaMetadata(stream.metadata);
+            props.metadata = stream.metadata;
+          }
+          if (props.playbackStatus) {
+            this.updatePlaybackState(props.playbackStatus, props);
+          }
         }
         break;
       case 'Stream.OnProperties':
-        // Old versions or different events might use this
         if (note.params.id === this.currentStreamId) {
-          if (note.params.metadata) this.updateMediaMetadata(note.params.metadata);
-          if (note.params.playbackStatus) this.updatePlaybackState(note.params.playbackStatus);
+          const props = note.params;
+          if (props.metadata) this.updateMediaMetadata(props.metadata);
+          if (props.playbackStatus) this.updatePlaybackState(props.playbackStatus, props);
         }
         break;
       case 'Server.OnUpdate':
@@ -166,6 +172,12 @@ export class AppController {
       }
     });
 
+    navigator.mediaSession.setActionHandler('stop', () => {
+      if (this.controlClient && this.currentStreamId) {
+        this.controlClient.controlStream(this.currentStreamId, 'stop');
+      }
+    });
+
     navigator.mediaSession.setActionHandler('nexttrack', () => {
       if (this.controlClient && this.currentStreamId) {
         this.controlClient.controlStream(this.currentStreamId, 'next');
@@ -175,6 +187,12 @@ export class AppController {
     navigator.mediaSession.setActionHandler('previoustrack', () => {
       if (this.controlClient && this.currentStreamId) {
         this.controlClient.controlStream(this.currentStreamId, 'previous');
+      }
+    });
+
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if (this.controlClient && this.currentStreamId && details.seekTime !== undefined) {
+        this.controlClient.controlStream(this.currentStreamId, 'seek', { position: Math.round(details.seekTime * 1000) });
       }
     });
   }
@@ -190,10 +208,22 @@ export class AppController {
     });
   }
 
-  private updatePlaybackState(status: 'playing' | 'paused' | 'stopped') {
+  private updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
     this.playbackStatus = status;
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : 'paused';
+      navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : (status === 'paused' ? 'paused' : 'none');
+      
+      if (properties && properties.metadata && properties.metadata.duration) {
+        try {
+          navigator.mediaSession.setPositionState({
+            duration: properties.metadata.duration / 1000,
+            playbackRate: properties.rate || 1,
+            position: Math.min(properties.position / 1000, properties.metadata.duration / 1000)
+          });
+        } catch (e) {
+          console.error('Failed to set position state', e);
+        }
+      }
     }
 
     if (status === 'playing') {

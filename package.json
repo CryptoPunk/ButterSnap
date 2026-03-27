@@ -17,12 +17,14 @@
     "lint": "tsc --noEmit",
     "check": "publint",
     "test": "bun test src index.test.ts",
-    "serve:snap": "snapserver -c snaptest.conf"
+    "serve:snap": "snapserver -c snaptest.conf",
+    "cypress:run": "cypress run"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^24.0.0",
     "concurrently": "^9.2.1",
+    "cypress": "^15.13.0",
     "esbuild": "^0.27.4",
     "publint": "^0.3.18",
     "typescript": "^6.0.0-dev.20260324",

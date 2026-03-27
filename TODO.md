@@ -18,12 +18,12 @@
 - [x] Implement full suite of JSON-RPC commands for Client, Group, and Stream management.
 
 ## Views (UI & Rendering)
-- [ ] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
+- [x] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
 - [ ] Componentize rich metadata display (track title, artist, album art) using `Stream.OnProperties`. [priority:medium]
 - [ ] Build interactive playback UI (play, pause, next, previous) connected to `Stream.Control`. [priority:medium]
-- [ ] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
-- [ ] Add visualizer "Power Mode" toggle (high-DPI / AA scaling). [priority:low]
 - [ ] Implement Fullscreen mode for the visualizer canvas (F key / UI button). [priority:medium]
+- [ ] Add auto-hiding overlay controls (fade out during inactivity). [priority:medium]
+- [ ] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
 
 ## Controller (Flow & Integration)
 - [ ] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]
