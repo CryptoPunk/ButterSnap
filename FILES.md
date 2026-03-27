@@ -1,5 +1,7 @@
 - [index.html](file:///Users/max/Projects/ButterSync/index.html) - Main demo entry point.
-- [src/main.ts](file:///Users/max/Projects/ButterSync/src/main.ts) - Visualizer glue logic.
+- [src/main.ts](file:///Users/max/Projects/ButterSync/src/main.ts) - MVC entry point.
+- [src/view/AppView.ts](file:///Users/max/Projects/ButterSync/src/view/AppView.ts) - UI and rendering.
+- [src/controller/AppController.ts](file:///Users/max/Projects/ButterSync/src/controller/AppController.ts) - Flow control.
 - [src/style.css](file:///Users/max/Projects/ButterSync/src/style.css) - Premium UI styles.
 - [src/protocol/SnapMessage.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapMessage.ts) - binary protocol.
 - [src/protocol/SnapProperties.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapProperties.ts) - stream metadata and properties.

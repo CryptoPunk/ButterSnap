@@ -1,38 +1,33 @@
 # TODO
 
-- [x] Install Vite, Rolldown/esbuild (Vite 6 uses esbuild for speed). [priority:high]
-- [x] Install and configure publint for package validation. [priority:medium]
-- [x] Configure `jsr.json` and JSR fields in `package.json`. [priority:medium]
-- [x] Setup source/distribution directory structure. [priority:medium]
-- [x] Add basic Vite build config with declaration generation. [priority:medium]
+## Phase 1: Infrastructure & Core [COMPLETED]
+- [x] Install Vite, Rolldown/esbuild.
+- [x] Configure `publint` and `jsr.json`.
+- [x] Implement `SnapMessage` binary parsing (38-byte header).
+- [x] Create `SnapStream` client for WebSocket binary data.
+- [x] Implement precise server-time synced playback scheduling.
+- [x] Refactor application to follow MVC architectural pattern.
 
-## Next Steps: Snapcast + Butterchurn
-- [x] Add `butterchurn` and `butterchurn-presets` dependencies. [priority:high]
-- [x] Implement `SnapMessage` header parsing (38 bytes). [priority:high]
-- [x] Create `SnapStream` client for WebSocket binary data. [priority:high]
-- [x] Setup `AudioContext` and connect it to Butterchurn. [priority:medium]
-- [x] Implement PCM chunk decoding and playback sync. [priority:medium]
-- [x] Build basic UI with a canvas and stream selector. [priority:medium]
-- [x] Verify WebSocket port is 1780 (NOT 1705). [priority:high]
-- [x] Add anti-aliasing (AA) toggle to visualizer. [priority:medium]
-- [x] Fix `baseUrl` deprecation in `tsconfig.json` (TS 7.0 compatibility). [priority:low]
+## Models (Core Logic & Protocol)
 - [ ] Expand `SnapMessage` test suite (coverage for all 5 message types and serialization). [priority:medium]
 - [ ] Add `TimeProvider` unit tests for server-local time sync and drift management. [priority:high]
 - [ ] Create `SnapClient` mock tests for WebSocket lifecycle and event multiplexing. [priority:medium]
-- [ ] Test UI-side JSON-RPC parsing for server status and stream selection. [priority:low]
-- [ ] Add e2e validation for audio/visualizer sync precision. [priority:low]
 - [ ] Add FLAC decoding support for high-fidelity lossless streams. [priority:high]
 - [ ] Implement Opus decoder for low-latency, bandwidth-efficient streaming. [priority:high]
 - [ ] Add Vorbis codec support for legacy Snapcast configurations. [priority:low]
-- [ ] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
+- [ ] Implement `Client` JSON-RPC commands: `SetVolume`, `SetLatency`, `SetName`, `DeleteClient`. [priority:medium]
+- [ ] Implement `Group` JSON-RPC commands: `SetMute`, `SetStream`, `SetClients`, `SetName`. [priority:low]
+- [ ] Implement `Stream` JSON-RPC commands: `Control`, `SetProperty`, `AddStream`, `RemoveStream`. [priority:medium]
 
-## Full Snapcast Control API Implementation
-- [ ] Implement `Client` commands: `SetVolume`, `SetLatency`, `SetName`, `DeleteClient`. [priority:medium]
-- [ ] Implement `Group` commands: `SetMute`, `SetStream`, `SetClients`, `SetName`. [priority:low]
-- [ ] Implement `Stream` commands: `Control` (Play/Pause/Seek), `SetProperty` (Volume/Mute). [priority:medium]
-- [ ] Implement `Stream` management: `AddStream`, `RemoveStream`. [priority:low]
-- [ ] Handle real-time Notifications from WebSocket: `Client.OnVolumeChanged`, `Group.OnStreamChanged`, `Stream.OnUpdate`. [priority:high]
-- [ ] Process `Stream.OnProperties` for rich metadata (track title, artist, album art display). [priority:medium]
-- [ ] Implement playback UI (play, pause, next, previous) using `Stream.Control`. [priority:medium]
-- [ ] Sync visualizer state with `playbackStatus` (auto-pause loop when stream is `stopped`). [priority:low]
-- [ ] Tie together Snapcast Control API with browser Media Session API (metadata/controls). [priority:medium]
+## Views (UI & Rendering)
+- [ ] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
+- [ ] Componentize rich metadata display (track title, artist, album art) using `Stream.OnProperties`. [priority:medium]
+- [ ] Build interactive playback UI (play, pause, next, previous) connected to `Stream.Control`. [priority:medium]
+- [ ] Improve Status indicators with CSS animations and transitions. [priority:low]
+
+## Controller (Flow & Integration)
+- [ ] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]
+- [ ] Sync visualizer render loop with `playbackStatus` (auto-pause on `stopped`). [priority:low]
+- [ ] Tie Snapcast Control API together with browser **Media Session API** (metadata/headset controls). [priority:high]
+- [ ] Persist application settings (Server URL, last Stream, AA toggle, scale) in `localStorage`. [priority:low]
+- [ ] Add e2e validation for audio/visualizer sync precision across network latencies. [priority:low]
