@@ -30,6 +30,9 @@ export class AppController {
         this.view.setAA(enabled);
         this.saveSettings();
       },
+      onPrev: () => this.handleControl('previous'),
+      onNext: () => this.handleControl('next'),
+      onTogglePlay: () => this.handleControl(this.playbackStatus === 'playing' ? 'pause' : 'play'),
     });
 
     this.loadSettings();
@@ -91,6 +94,9 @@ export class AppController {
     });
 
     await this.client.connect();
+    
+    // Automatically load streams after connection to populate the selector
+    this.handleLoadStreams(url);
   }
 
   private handleDisconnect() {
@@ -154,6 +160,19 @@ export class AppController {
       case 'Server.OnUpdate':
         this.handleLoadStreams(this.view.getServerUrl());
         break;
+      case 'Client.OnVolumeChanged':
+        // Optional: show volume HUD
+        break;
+    }
+  }
+
+  private async handleControl(command: 'play' | 'pause' | 'next' | 'previous') {
+    if (this.controlClient && this.currentStreamId) {
+      try {
+        await this.controlClient.controlStream(this.currentStreamId, command);
+      } catch (e) {
+        console.error(`Failed to send ${command} command`, e);
+      }
     }
   }
 
@@ -206,6 +225,12 @@ export class AppController {
       album: metadata.album || '',
       artwork: metadata.artUrl ? [{ src: metadata.artUrl }] : []
     });
+
+    this.view.updateMetadata({
+      title: metadata.title,
+      artist: metadata.artist?.join(', '),
+      art: metadata.artUrl
+    });
   }
 
   private updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
@@ -231,12 +256,13 @@ export class AppController {
     } else {
       this.view.stopLoop();
     }
+
+    this.view.setPlaybackStatus(status);
   }
 
   private handleShuffle() {
-    // We could move the presets logic here, but for now just call the view.
-    // In a real MVC, the controller would pick a random preset and tell the view to load it.
-    // For simplicity, let's keep the random logic in view or here.
+    this.view.shuffle();
+    this.saveSettings();
   }
 
   private processAudioChunk(data: any) {

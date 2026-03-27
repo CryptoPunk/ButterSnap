@@ -9,6 +9,9 @@ export interface ViewEvents {
   onShuffle: () => void;
   onScaleChange: (scale: number) => void;
   onAaToggle: (enabled: boolean) => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onTogglePlay: () => void;
 }
 
 export class AppView {
@@ -25,6 +28,14 @@ export class AppView {
   private chunkCounter = document.getElementById('chunk-count') as HTMLElement;
   private latencyDisplay = document.getElementById('latency') as HTMLElement;
   private fullscreenBtn = document.getElementById('fullscreen-btn') as HTMLButtonElement;
+  private prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
+  private nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+  private playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement;
+  private albumArt = document.getElementById('album-art') as HTMLImageElement;
+  private trackTitle = document.getElementById('track-title') as HTMLElement;
+  private trackArtist = document.getElementById('track-artist') as HTMLElement;
+  private metadataHud = document.getElementById('metadata-hud') as HTMLElement;
+  private statusIndicator = document.getElementById('status-indicator') as HTMLElement;
 
   private visualizer: any = null;
   private presets: any = null;
@@ -63,6 +74,10 @@ export class AppView {
     this.aaCheckbox.onchange = () => {
       this.events.onAaToggle(this.aaCheckbox.checked);
     };
+
+    this.prevBtn.onclick = () => this.events.onPrev();
+    this.nextBtn.onclick = () => this.events.onNext();
+    this.playPauseBtn.onclick = () => this.events.onTogglePlay();
     
     this.initActivityTracker();
     
@@ -157,6 +172,12 @@ export class AppView {
     });
   }
 
+  public shuffle() {
+    const names = Object.keys(this.presets);
+    const random = names[Math.floor(Math.random() * names.length)];
+    this.loadPreset(random);
+  }
+
   private resizeVisualizer() {
     if (!this.visualizer) return;
     let scale = parseFloat(this.scaleSelector.value);
@@ -173,9 +194,37 @@ export class AppView {
   }
 
   public updateStatus(state: string) {
+    const isConnected = state === 'CONNECTED' || state === 'CONNECTING' || state === 'RECONNECTING';
     this.statusText.innerText = state;
-    this.statusText.className = `status-${state.toLowerCase()}`;
-    this.connectBtn.innerText = (state === 'CONNECTED' || state === 'CONNECTING') ? 'Disconnect' : 'Connect';
+    this.statusIndicator.className = `status-${state.toLowerCase()}`;
+    this.connectBtn.innerText = isConnected ? 'Disconnect' : 'Connect';
+    
+    // Hide server config when connected to clean up UI (now with animation)
+    this.serverInput.classList.toggle('hidden-config', isConnected);
+    this.loadStreamsBtn.classList.toggle('hidden-config', isConnected);
+  }
+
+  public updateMetadata(metadata: any) {
+    if (!metadata || (!metadata.title && !metadata.artist)) {
+      this.metadataHud.classList.add('hidden');
+      return;
+    }
+
+    this.metadataHud.classList.remove('hidden');
+    this.trackTitle.innerText = metadata.title || 'Unknown Title';
+    this.trackArtist.innerText = metadata.artist || 'Unknown Artist';
+    
+    if (metadata.art) {
+      this.albumArt.src = metadata.art;
+      this.albumArt.style.display = 'block';
+    } else {
+      this.albumArt.style.display = 'none';
+    }
+  }
+
+  public setPlaybackStatus(status: string) {
+    const isPlaying = status === 'playing';
+    this.playPauseBtn.innerText = isPlaying ? '⏸' : '▶';
   }
 
   public updateStreams(streams: any[]) {

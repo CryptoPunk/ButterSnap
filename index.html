@@ -11,38 +11,59 @@
 <body>
     <div id="app">
         <header>
-            <h1>ButterSync</h1>
-            <div class="controls">
+            <div class="logo-area">
+                <h1>ButterSync</h1>
+                <div id="status-indicator">
+                    <span id="status-dot"></span>
+                    <span id="status">Disconnected</span>
+                </div>
+            </div>
+            
+            <div class="server-controls">
                 <input type="text" id="server-url" value="http://localhost:1780" placeholder="Snapserver URL">
                 <button id="load-streams-btn">List</button>
                 <select id="stream-selector">
                     <option value="">Default Stream</option>
                 </select>
                 <button id="connect-btn">Connect</button>
-                <span id="status" class="status-disconnected">Disconnected</span>
-            </div>
-            <div class="preset-info">
-                Preset: <select id="preset-selector">
-                    <option>Loading...</option>
-                </select>
-                <button id="shuffle-btn">Shuffle</button>
-                | Scale: <select id="scale-selector">
-                    <option value="0.125">0.125x</option>
-                    <option value="0.25">0.25x</option>
-                    <option value="0.5">0.5x</option>
-                    <option value="1" selected>1.0x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="2">2.0x</option>
-                    <option value="4">4.0x</option>
-                    <option value="8">8.0x</option>
-                </select>
-                | <label class="checkbox-label"><input type="checkbox" id="aa-checkbox"> AA</label>
-                | <button id="fullscreen-btn">⛶</button>
             </div>
         </header>
 
         <main>
             <canvas id="canvas"></canvas>
+            
+            <div id="metadata-hud" class="hud-panel hidden">
+                <img id="album-art" src="" alt="" onerror="this.style.display='none'">
+                <div class="track-info">
+                    <h2 id="track-title">Ready to Sync</h2>
+                    <p id="track-artist">Select a stream and connect</p>
+                </div>
+            </div>
+
+            <div id="playback-hud" class="hud-panel">
+                <div class="playback-controls">
+                    <button id="prev-btn" class="icon-btn">⏮</button>
+                    <button id="play-pause-btn" class="icon-btn">▶</button>
+                    <button id="next-btn" class="icon-btn">⏭</button>
+                </div>
+                <div class="visual-controls">
+                    <select id="preset-selector"><option>Loading...</option></select>
+                    <button id="shuffle-btn">Shuffle</button>
+                    <select id="scale-selector">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected>1.0x</option>
+                        <option value="2.0">2.0x</option>
+                    </select>
+                    <div class="aa-control">
+                        <span>AA</span>
+                        <label class="switch">
+                            <input type="checkbox" id="aa-checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <button id="fullscreen-btn">⛶</button>
+                </div>
+            </div>
         </main>
 
         <footer>

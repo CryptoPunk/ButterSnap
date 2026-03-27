@@ -19,11 +19,11 @@
 
 ## Views (UI & Rendering)
 - [x] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
-- [ ] Componentize rich metadata display (track title, artist, album art) using `Stream.OnProperties`. [priority:medium]
-- [ ] Build interactive playback UI (play, pause, next, previous) connected to `Stream.Control`. [priority:medium]
+- [x] Componentize rich metadata display (track title, artist, album art) using `Stream.OnProperties`. [priority:medium]
+- [x] Build interactive playback UI (play, pause, next, previous) connected to `Stream.Control`. [priority:medium]
 - [x] Implement Fullscreen mode for the visualizer canvas (F key / UI button). [priority:medium]
 - [x] Add auto-hiding overlay controls (fade out during inactivity). [priority:medium]
-- [ ] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
+- [x] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
 
 ## Controller (Flow & Integration) [COMPLETED]
 - [x] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]
@@ -32,4 +32,13 @@
 - [x] Persist application settings (Server URL, last Stream, AA toggle, scale) in `localStorage`. [priority:low]
 - [x] Add e2e validation for audio/visualizer sync precision across network latencies. [priority:low]
 - [x] Establish Cypress E2E test suite for Media Session API bridge. [priority:high]
+
+## Phase 3: Premium Experience
+- [ ] Implement a real-time **Visual Progress Bar** in the Metadata HUD (duration/position). [priority:medium]
+- [ ] Support for **Multiple Streams** (split-screen or dynamic tile switching). [priority:low]
+- [ ] Add an **Audio Equalizer** overlay (6-band CSS/WebAudio) connected to Snapcast. [priority:medium]
+- [ ] Build a **Visualizer Preset Browser** with category search and favorites. [priority:medium]
+- [ ] Implement **Theme customizer** (change accent colors and glow intensity). [priority:low]
+- [ ] Optimize visualizer performance for high-refresh-rate displays (120Hz+ sync). [priority:medium]
+- [ ] Integrate **Volume HUD** for individual client control (visual feedback on delta). [priority:low]
 
