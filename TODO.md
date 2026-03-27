@@ -25,3 +25,10 @@
 - [ ] Implement Opus decoder for low-latency, bandwidth-efficient streaming. [priority:high]
 - [ ] Add Vorbis codec support for legacy Snapcast configurations. [priority:low]
 - [ ] Implement `visualizer.loadExtraImages` to support custom textures in presets. [priority:medium]
+
+## Full Snapcast Control API Implementation
+- [ ] Implement `Client` commands: `SetVolume`, `SetLatency`, `SetName`, `DeleteClient`. [priority:medium]
+- [ ] Implement `Group` commands: `SetMute`, `SetStream`, `SetClients`, `SetName`. [priority:low]
+- [ ] Implement `Stream` commands: `Control` (Play/Pause/Seek), `SetProperty` (Volume/Mute). [priority:medium]
+- [ ] Implement `Stream` management: `AddStream`, `RemoveStream`. [priority:low]
+- [ ] Handle real-time Notifications from WebSocket: `Client.OnVolumeChanged`, `Group.OnStreamChanged`, `Stream.OnUpdate`. [priority:high]

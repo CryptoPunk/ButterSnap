@@ -1,5 +1,6 @@
 import { SnapClient } from './client/SnapClient';
 import { PcmChunkMessage, CodecMessage, SampleFormat } from './protocol/SnapMessage';
+import { SnapControlClient } from './client/SnapControlClient';
 import butterchurn from 'butterchurn';
 import butterchurnPresets from 'butterchurn-presets';
 import './style.css';
@@ -8,6 +9,7 @@ import './style.css';
 let audioContext: AudioContext | null = null;
 let visualizer: any = null;
 let client: SnapClient | null = null;
+let controlClient: SnapControlClient | null = null;
 let sampleFormat: SampleFormat = new SampleFormat();
 let lastChunkEnd = 0;
 let analyzer: AnalyserNode | null = null;
@@ -217,19 +219,17 @@ loadStreamsBtn.onclick = async () => {
   try {
     loadStreamsBtn.disabled = true;
     loadStreamsBtn.innerText = '...';
-    const response = await fetch(`${url}/jsonrpc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "Server.GetStatus"
-      })
-    });
 
-    const data = await response.json();
-    if (data.result && data.result.server && data.result.server.streams) {
-      const streams = data.result.server.streams;
+    if (!controlClient || controlClient.baseUrl !== url) {
+      if (controlClient) controlClient.disconnect();
+      controlClient = new SnapControlClient(url);
+      await controlClient.connect();
+    }
+
+    const data = await controlClient.sendRequest('Server.GetStatus');
+
+    if (data.server && data.server.streams) {
+      const streams = data.server.streams;
       streamSelector.innerHTML = '<option value="">Default Stream</option>';
       streams.forEach((s: any) => {
         const option = document.createElement('option');
@@ -241,6 +241,7 @@ loadStreamsBtn.onclick = async () => {
   } catch (e) {
     console.error('Failed to load streams:', e);
     statusText.innerText = 'Error loading streams';
+    controlClient = null;
   } finally {
     loadStreamsBtn.disabled = false;
     loadStreamsBtn.innerText = 'List';
