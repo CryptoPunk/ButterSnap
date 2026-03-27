@@ -2,6 +2,7 @@
 - [src/main.ts](file:///Users/max/Projects/ButterSync/src/main.ts) - Visualizer glue logic.
 - [src/style.css](file:///Users/max/Projects/ButterSync/src/style.css) - Premium UI styles.
 - [src/protocol/SnapMessage.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapMessage.ts) - binary protocol.
+- [src/protocol/SnapProperties.ts](file:///Users/max/Projects/ButterSync/src/protocol/SnapProperties.ts) - stream metadata and properties.
 - [src/client/SnapClient.ts](file:///Users/max/Projects/ButterSync/src/client/SnapClient.ts) - stream client.
 - [src/client/SnapControlClient.ts](file:///Users/max/Projects/ButterSync/src/client/SnapControlClient.ts) - JSON-RPC control client.
 - [src/types/butterchurn.d.ts](file:///Users/max/Projects/ButterSync/src/types/butterchurn.d.ts) - typings.
