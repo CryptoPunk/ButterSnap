@@ -9,6 +9,24 @@ import time
 # IPC Socket for instrumentation
 SOCKET_PATH = "/tmp/snap_instrument.sock"
 
+"""
+Snapcast Stream Instrumentation Plugin
+--------------------------------------
+This script acts as a Snapcast 'controlscript' (Plugin Mode) and a CLI (Instrumentation Mode).
+
+USAGE EXAMPLES:
+
+1. Plugin Mode (Normally run by Snapserver via snaptest.conf):
+   ./snap_instrument.py --stream test --snapcast-host localhost --snapcast-port 1780
+
+2. Instrumentation Mode (Inject metadata/status while the plugin is running):
+   python3 scripts/snap_instrument.py metadata --title "Nebula Dreams" --artist "SynthWave"
+   python3 scripts/snap_instrument.py metadata --duration 345.2 --art "https://example.com/cover.jpg"
+   python3 scripts/snap_instrument.py status paused
+   python3 scripts/snap_instrument.py status playing
+   python3 scripts/snap_instrument.py props '{"volume": 85, "shuffle": true}'
+"""
+
 class SnapPlugin:
     def __init__(self):
         self.state = {
@@ -132,10 +150,10 @@ class SnapPlugin:
             self.log(f"Method not found: {method}", "Warning")
             self.send_error(req_id, -32601, "Method not found")
 
-    def run(self):
+    def run(self, stream_id=None, snap_host=None, snap_port=None):
         # Notify server we are ready
         self.send_notification("Plugin.Stream.Ready", {})
-        self.log("Plugin interface ready and starting heartbeat loop", "Notice")
+        self.log(f"Plugin interface ready for stream '{stream_id}' at {snap_host}:{snap_port}", "Notice")
         
         # Start background tasks
         threading.Thread(target=self.ipc_listener, daemon=True).start()
@@ -241,13 +259,23 @@ def command_mode():
         sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1].startswith("--"):
-        command_mode()
+    # Check if we were called with Snapserver's required arguments
+    # Snapserver passes --stream, --snapcast-host, --snapcast-port
+    server_args = [arg for arg in sys.argv if arg.startswith("--stream") or arg.startswith("--snapcast")]
+    
+    if not sys.stdin.isatty() or server_args:
+        # We are likely running as a plugin
+        import argparse
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument("--stream", help="Stream ID")
+        parser.add_argument("--snapcast-host", help="Snapcast HTTP host")
+        parser.add_argument("--snapcast-port", help="Snapcast HTTP port")
+        
+        # Parse known args, ignore other CLI command args if any
+        args, _ = parser.parse_known_args()
+        
+        plugin = SnapPlugin()
+        plugin.run(stream_id=args.stream, snap_host=args.snapcast_host, snap_port=args.snapcast_port)
     else:
-        # Check if we are being run by Snapserver (stdout is a pipe/socket)
-        # or if we should just enter command mode if arguments are provided
-        if not sys.stdin.isatty():
-            plugin = SnapPlugin()
-            plugin.run()
-        else:
-            command_mode()
+        # Likely running manually for instrumentation
+        command_mode()
