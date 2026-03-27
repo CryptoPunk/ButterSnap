@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "ES6",
+    "module": "ESNext",
+    "lib": ["ES6", "DOM"],
+    "moduleResolution": "node",
     "types": ["cypress", "node"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true,
     "ignoreDeprecations": "6.0"
   },
   "include": ["**/*.ts"]

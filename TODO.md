@@ -25,9 +25,11 @@
 - [ ] Add auto-hiding overlay controls (fade out during inactivity). [priority:medium]
 - [ ] Improve Status indicators with CSS animations and transitions (Glassmorphism style). [priority:low]
 
-## Controller (Flow & Integration)
-- [ ] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]
-- [ ] Sync visualizer render loop with `playbackStatus` (auto-pause on `stopped`). [priority:low]
-- [ ] Tie Snapcast Control API together with browser **Media Session API** (metadata/headset controls). [priority:high]
-- [ ] Persist application settings (Server URL, last Stream, AA toggle, scale) in `localStorage`. [priority:low]
-- [ ] Add e2e validation for audio/visualizer sync precision across network latencies. [priority:low]
+## Controller (Flow & Integration) [COMPLETED]
+- [x] Handle real-time Notifications from Control WebSocket (`Client.OnVolumeChanged`, `Stream.OnUpdate`). [priority:high]
+- [x] Sync visualizer render loop with `playbackStatus` (auto-pause on `stopped`). [priority:low]
+- [x] Tie Snapcast Control API together with browser **Media Session API** (metadata/headset controls). [priority:high]
+- [x] Persist application settings (Server URL, last Stream, AA toggle, scale) in `localStorage`. [priority:low]
+- [x] Add e2e validation for audio/visualizer sync precision across network latencies. [priority:low]
+- [x] Establish Cypress E2E test suite for Media Session API bridge. [priority:high]
+
