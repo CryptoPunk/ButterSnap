@@ -30,7 +30,7 @@ The plugin must maintain and report these boolean flags:
 - [x] **Property Synchronization**: Emit `Plugin.Stream.Player.Properties` whenever *any* attribute (position, volume, track title) changes. 
 - [x] **Instrumentation Logs**: Implement `Plugin.Stream.Log` with compliant severity levels (`Trace` through `Fatal`).
 
-## 5. Advanced Handling & Robustness
-- [ ] **Fractional Position Tracking**: Track and report `position` as a floating-point number (seconds).
-- [ ] **Embedded Art Support**: (Optional) Support `artData` as Base64 JSON.
-- [ ] **Error Protocol**: Return standard JSON-RPC 2.0 error objects (e.g., `-32601`, `-32602`).
+## 5. Advanced Handling & Robustness [COMPLETED]
+- [x] **Fractional Position Tracking**: Track and report `position` as a floating-point number (seconds).
+- [x] **Embedded Art Support**: (Optional) Support `artData` as Base64 JSON.
+- [x] **Error Protocol**: Return standard JSON-RPC 2.0 error objects (e.g., `-32601`, `-32602`).

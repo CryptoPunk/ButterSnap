@@ -63,22 +63,29 @@ class SnapPlugin:
 
     def notify_properties(self):
         with self.lock:
-            # Send the complete state for consistency in testing
             self.send_notification("Plugin.Stream.Player.Properties", self.state)
 
     def heartbeat_loop(self):
-        """Increments position when playing and sends periodic updates"""
+        """High-precision 10Hz position tracking for fractional smooth updates"""
         while True:
-            time.sleep(1.0)
+            time.sleep(0.1)
             with self.lock:
                 if self.state["playbackStatus"] == "playing":
-                    self.state["position"] += 1.0
-                    # Notify property change (position)
+                    self.state["position"] += 0.1
+                    # Notify property change (position) every 1.0s or on major changes
+                    # To avoid flooding, we notify at 1Hz or when requested
+                    pass 
+            
+            # Simple 1Hz notification logic
+            if int(time.time() * 10) % 10 == 0:
+                if self.state["playbackStatus"] == "playing":
                     self.notify_properties()
+
+    def send_error(self, req_id, code, message):
+        self.send_response(req_id, error={"code": code, "message": message})
 
     def handle_request(self, req):
         if req.get("jsonrpc") != "2.0":
-            self.log("Invalid JSON-RPC version", "Error")
             return
 
         method = req.get("method")
@@ -103,9 +110,9 @@ class SnapPlugin:
                 elif cmd == "previous": self.log("Previous track requested", "Notice")
                 elif cmd == "seek":
                     offset = p.get("offset", 0)
-                    self.state["position"] += offset
+                    self.state["position"] += float(offset)
                 elif cmd == "setPosition":
-                    self.state["position"] = p.get("position", 0)
+                    self.state["position"] = float(p.get("position", 0))
             
             self.send_response(req_id, "ok")
             self.notify_properties()
@@ -122,8 +129,8 @@ class SnapPlugin:
             if properties_changed:
                 self.notify_properties()
         else:
-            self.log(f"Unknown method: {method}", "Warning")
-            self.send_response(req_id, error={"code": -32601, "message": "Method not found"})
+            self.log(f"Method not found: {method}", "Warning")
+            self.send_error(req_id, -32601, "Method not found")
 
     def run(self):
         # Notify server we are ready
@@ -186,6 +193,7 @@ def command_mode():
     meta.add_argument("--album", help="Album Name")
     meta.add_argument("--duration", type=float, help="Duration in seconds")
     meta.add_argument("--art", help="Album Art URL")
+    meta.add_argument("--art-data", help="Base64 encoded image data")
     
     # Status command
     status = subparsers.add_parser("status")
@@ -208,6 +216,11 @@ def command_mode():
         if args.album: cmd["metadata"]["album"] = args.album
         if args.duration: cmd["metadata"]["duration"] = args.duration
         if args.art: cmd["metadata"]["artUrl"] = args.art
+        if args.art_data:
+            cmd["metadata"]["artData"] = {
+                "data": args.art_data,
+                "extension": "png" # Default to png for testing
+            }
     elif args.command == "status":
         cmd["status"] = args.value
     elif args.command == "props":
