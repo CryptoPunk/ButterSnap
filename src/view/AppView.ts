@@ -24,6 +24,7 @@ export class AppView {
   private streamSelector = document.getElementById('stream-selector') as HTMLSelectElement;
   private chunkCounter = document.getElementById('chunk-count') as HTMLElement;
   private latencyDisplay = document.getElementById('latency') as HTMLElement;
+  private fullscreenBtn = document.getElementById('fullscreen-btn') as HTMLButtonElement;
 
   private visualizer: any = null;
   private presets: any = null;
@@ -62,8 +63,23 @@ export class AppView {
     this.aaCheckbox.onchange = () => {
       this.events.onAaToggle(this.aaCheckbox.checked);
     };
+    
+    this.initActivityTracker();
+    
+    this.fullscreenBtn.onclick = () => this.toggleFullscreen();
 
     window.onresize = () => this.resizeVisualizer();
+    
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'f' && e.target === document.body) {
+        this.toggleFullscreen();
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      this.resizeVisualizer();
+      this.updateFullscreenButton();
+    });
   }
 
   public initVisualizer(audioContext: AudioContext, analyzer: AnalyserNode) {
@@ -208,5 +224,42 @@ export class AppView {
 
   public getServerUrl(): string {
     return this.serverInput.value.trim();
+  }
+
+  public async toggleFullscreen() {
+    const app = document.getElementById('app');
+    if (!app) return;
+
+    if (!document.fullscreenElement) {
+      try {
+        await app.requestFullscreen();
+      } catch (err) {
+        console.error(`Error attempting to enable full-screen mode: ${err}`);
+      }
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  private updateFullscreenButton() {
+    this.fullscreenBtn.innerText = document.fullscreenElement ? '⛶' : '⛶'; // Could change icon if desired
+    this.fullscreenBtn.classList.toggle('active', !!document.fullscreenElement);
+  }
+
+  private activityTimer: any = null;
+  private initActivityTracker() {
+    const handleActivity = () => {
+      document.body.classList.remove('inactive');
+      clearTimeout(this.activityTimer);
+      this.activityTimer = setTimeout(() => {
+        if (document.fullscreenElement) {
+          document.body.classList.add('inactive');
+        }
+      }, 3000);
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    handleActivity();
   }
 }
