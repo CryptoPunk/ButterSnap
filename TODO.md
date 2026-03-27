@@ -35,8 +35,6 @@
 
 ## Phase 3: Premium Experience
 - [ ] Implement a real-time **Visual Progress Bar** in the Metadata HUD (duration/position). [priority:medium]
-- [ ] Support for **Multiple Streams** (split-screen or dynamic tile switching). [priority:low]
-- [ ] Add an **Audio Equalizer** overlay (6-band CSS/WebAudio) connected to Snapcast. [priority:medium]
 - [ ] Build a **Visualizer Preset Browser** with category search and favorites. [priority:medium]
 - [ ] Implement **Theme customizer** (change accent colors and glow intensity). [priority:low]
 - [ ] Optimize visualizer performance for high-refresh-rate displays (120Hz+ sync). [priority:medium]
