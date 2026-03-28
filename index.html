@@ -19,58 +19,114 @@
                 </div>
             </div>
             
-            <div class="server-controls">
-                <input type="text" id="server-url" value="http://localhost:1780" placeholder="Snapserver URL">
-                <button id="load-streams-btn">List</button>
-                <select id="stream-selector">
-                    <option value="">Default Stream</option>
-                </select>
-                <button id="connect-btn">Connect</button>
+            <div class="header-controls">
+                <div class="server-controls">
+                    <input type="text" id="server-url" value="http://localhost:1780" placeholder="Snapserver URL">
+                    <button id="load-streams-btn">List</button>
+                    <button id="connect-btn">Connect</button>
+                </div>
+                <button id="visual-settings-btn" class="icon-btn"><i class="ph ph-gear"></i></button>
             </div>
         </header>
 
         <main>
             <canvas id="canvas"></canvas>
-            
-            <div id="metadata-hud" class="hud-panel hidden">
-                <img id="album-art" src="" alt="" onerror="this.style.display='none'">
-                <div class="track-info">
-                    <h2 id="track-title">Ready to Sync</h2>
-                    <p id="track-artist">Select a stream and connect</p>
-                </div>
-            </div>
 
-            <div id="playback-hud" class="hud-panel">
-                <div class="playback-controls">
-                    <button id="prev-btn" class="icon-btn">⏮</button>
-                    <button id="play-pause-btn" class="icon-btn">▶</button>
-                    <button id="next-btn" class="icon-btn">⏭</button>
+            <div id="visual-settings-panel" class="hud-panel hidden">
+                <div class="panel-header">
+                    <h3>Visual Settings</h3>
+                    <button id="close-settings-btn" class="close-btn"><i class="ph ph-x"></i></button>
                 </div>
                 <div class="visual-controls">
-                    <select id="preset-selector"><option>Loading...</option></select>
-                    <button id="shuffle-btn">Shuffle</button>
-                    <select id="scale-selector">
-                        <option value="0.5">0.5x</option>
-                        <option value="1" selected>1.0x</option>
-                        <option value="2.0">2.0x</option>
-                    </select>
-                    <div class="aa-control">
-                        <span>AA</span>
-                        <label class="switch">
-                            <input type="checkbox" id="aa-checkbox">
-                            <span class="slider"></span>
-                        </label>
+                    <div class="control-group">
+                        <label>Theme</label>
+                        <select id="theme-selector">
+                            <option value="theme-neon" selected>Neon (Default)</option>
+                            <option value="theme-sunset">Sunset</option>
+                            <option value="theme-forest">Forest</option>
+                            <option value="theme-midnight">Midnight</option>
+                        </select>
                     </div>
-                    <button id="fullscreen-btn">⛶</button>
+                    <div class="control-group">
+                        <label>Preset</label>
+                        <select id="preset-selector"><option>Loading...</option></select>
+                        <button id="shuffle-btn">Shuffle</button>
+                    </div>
+                    <div class="control-group">
+                        <label>Render Scale</label>
+                        <select id="scale-selector">
+                            <option value="0.5">0.5x</option>
+                            <option value="1" selected>1.0x</option>
+                            <option value="2.0">2.0x</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Anti-Aliasing</label>
+                        <div class="aa-control">
+                            <label class="switch">
+                                <input type="checkbox" id="aa-checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <button id="fullscreen-btn">
+                            <i class="ph ph-corners-out icon-windowed"></i>
+                            <i class="ph ph-corners-in icon-fullscreen"></i>
+                            <span class="btn-text">Fullscreen</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="playback-hud" class="hud-panel">
+                <div id="metadata-area" class="hidden">
+                    <img id="album-art" src="" alt="" onerror="this.style.display='none'">
+                    <div class="track-info">
+                        <h2 id="track-title">Ready to Sync</h2>
+                        <p id="track-artist">Select a stream and connect</p>
+                    </div>
+                </div>
+
+                <div class="central-controls">
+                    <div class="playback-buttons">
+                        <button id="playback-shuffle-btn" class="icon-btn state-btn"><i class="ph ph-shuffle"></i></button>
+                        <button id="prev-btn" class="icon-btn"><i class="ph ph-skip-back"></i></button>
+                        <button id="play-pause-btn" class="icon-btn">
+                            <i class="ph ph-play icon-play"></i>
+                            <i class="ph ph-pause icon-pause"></i>
+                        </button>
+                        <button id="next-btn" class="icon-btn"><i class="ph ph-skip-forward"></i></button>
+                        <button id="playback-loop-btn" class="icon-btn state-btn">
+                            <i class="ph ph-repeat icon-loop-playlist"></i>
+                            <i class="ph ph-repeat-once icon-loop-track"></i>
+                            <i class="ph ph-prohibit icon-loop-none"></i>
+                        </button>
+                    </div>
+                    <div id="progress-container">
+                        <div id="progress-bar"></div>
+                    </div>
+                </div>
+
+                <div class="audio-controls">
+                    <div class="control-row">
+                        <span id="volume-icon"><i class="ph ph-speaker-high"></i></span>
+                        <input type="range" id="volume-slider" min="0" max="100" value="100">
+                    </div>
+                    <div class="selection-row">
+                        <select id="stream-selector" title="Source Stream">
+                            <option value="">Default Stream</option>
+                        </select>
+                        <select id="client-selector" title="Playback Device">
+                            <option value="">This Browser</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </main>
 
         <footer>
-            <div id="debug-info">
-                Latency: <span id="latency">0</span>ms |
-                Chunks: <span id="chunk-count">0</span>
-            </div>
+            <!-- Debug info moved to HUD -->
         </footer>
     </div>
     <script type="module" src="./src/main.ts"></script>

@@ -12,6 +12,10 @@ export interface ViewEvents {
   onPrev: () => void;
   onNext: () => void;
   onTogglePlay: () => void;
+  onToggleShuffle: () => void;
+  onToggleLoop: () => void;
+  onVolumeChange: (volume: number) => void;
+  onClientChange: (clientId: string) => void;
 }
 
 export class AppView {
@@ -31,11 +35,19 @@ export class AppView {
   private prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
   private nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
   private playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement;
+  private playbackShuffleBtn = document.getElementById('playback-shuffle-btn') as HTMLButtonElement;
+  private playbackLoopBtn = document.getElementById('playback-loop-btn') as HTMLButtonElement;
   private albumArt = document.getElementById('album-art') as HTMLImageElement;
   private trackTitle = document.getElementById('track-title') as HTMLElement;
   private trackArtist = document.getElementById('track-artist') as HTMLElement;
-  private metadataHud = document.getElementById('metadata-hud') as HTMLElement;
+  private progressBar = document.getElementById('progress-bar') as HTMLElement;
+  private metadataArea = document.getElementById('metadata-area') as HTMLElement;
   private statusIndicator = document.getElementById('status-indicator') as HTMLElement;
+  private visualSettingsPanel = document.getElementById('visual-settings-panel') as HTMLElement;
+  private visualSettingsBtn = document.getElementById('visual-settings-btn') as HTMLButtonElement;
+  private closeSettingsBtn = document.getElementById('close-settings-btn') as HTMLButtonElement;
+  private volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+  private clientSelector = document.getElementById('client-selector') as HTMLSelectElement;
 
   private visualizer: any = null;
   private presets: any = null;
@@ -78,10 +90,28 @@ export class AppView {
     this.prevBtn.onclick = () => this.events.onPrev();
     this.nextBtn.onclick = () => this.events.onNext();
     this.playPauseBtn.onclick = () => this.events.onTogglePlay();
+    this.playbackShuffleBtn.onclick = () => this.events.onToggleShuffle();
+    this.playbackLoopBtn.onclick = () => this.events.onToggleLoop();
     
     this.initActivityTracker();
     
     this.fullscreenBtn.onclick = () => this.toggleFullscreen();
+    
+    this.visualSettingsBtn.onclick = () => {
+      this.visualSettingsPanel.classList.toggle('hidden');
+    };
+
+    this.closeSettingsBtn.onclick = () => {
+      this.visualSettingsPanel.classList.add('hidden');
+    };
+
+    this.volumeSlider.oninput = () => {
+      this.events.onVolumeChange(parseInt(this.volumeSlider.value));
+    };
+
+    this.clientSelector.onchange = () => {
+      this.events.onClientChange(this.clientSelector.value);
+    };
 
     window.onresize = () => this.resizeVisualizer();
     
@@ -205,12 +235,12 @@ export class AppView {
   }
 
   public updateMetadata(metadata: any) {
-    if (!metadata || (!metadata.title && !metadata.artist)) {
-      this.metadataHud.classList.add('hidden');
+    if (!metadata || !metadata.title) {
+      this.metadataArea.classList.add('hidden');
       return;
     }
 
-    this.metadataHud.classList.remove('hidden');
+    this.metadataArea.classList.remove('hidden');
     this.trackTitle.innerText = metadata.title || 'Unknown Title';
     this.trackArtist.innerText = metadata.artist || 'Unknown Artist';
     
@@ -220,11 +250,31 @@ export class AppView {
     } else {
       this.albumArt.style.display = 'none';
     }
+
+    if (metadata.position !== undefined && metadata.duration !== undefined) {
+      this.updateProgress(metadata.position, metadata.duration);
+    }
+  }
+
+  public updateProgress(position: number, duration: number) {
+    if (!duration) return;
+    const percent = Math.min(100, (position / duration) * 100);
+    this.progressBar.style.width = `${percent}%`;
   }
 
   public setPlaybackStatus(status: string) {
     const isPlaying = status === 'playing';
-    this.playPauseBtn.innerText = isPlaying ? '⏸' : '▶';
+    this.playPauseBtn.classList.toggle('playing', isPlaying);
+  }
+
+  public setPlaybackModes(shuffle: boolean, loopStatus: string) {
+    this.playbackShuffleBtn.classList.toggle('active', shuffle);
+    
+    this.playbackLoopBtn.classList.remove('loop-none', 'loop-track', 'loop-playlist');
+    this.playbackLoopBtn.classList.add(`loop-${loopStatus}`);
+    this.playbackLoopBtn.classList.toggle('active', loopStatus !== 'none');
+    
+    this.playbackLoopBtn.title = `Looping: ${loopStatus}`;
   }
 
   public updateStreams(streams: any[]) {
@@ -234,6 +284,16 @@ export class AppView {
       opt.value = s.id;
       opt.text = s.uri ? (s.uri.query?.name || s.id) : s.id;
       this.streamSelector.appendChild(opt);
+    });
+  }
+
+  public updateClients(clients: any[]) {
+    this.clientSelector.innerHTML = '<option value="">Select Device</option>';
+    clients.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.text = `${c.host?.name || 'Unknown'} (${c.id.substring(0, 6)})`;
+      this.clientSelector.appendChild(opt);
     });
   }
 
@@ -291,8 +351,14 @@ export class AppView {
   }
 
   private updateFullscreenButton() {
-    this.fullscreenBtn.innerText = document.fullscreenElement ? '⛶' : '⛶'; // Could change icon if desired
-    this.fullscreenBtn.classList.toggle('active', !!document.fullscreenElement);
+    const isFS = !!document.fullscreenElement;
+    this.fullscreenBtn.classList.toggle('fullscreen', isFS);
+    this.fullscreenBtn.classList.toggle('active', isFS);
+    
+    const textSpan = this.fullscreenBtn.querySelector('.btn-text');
+    if (textSpan) {
+      textSpan.textContent = isFS ? 'Exit Fullscreen' : 'Fullscreen';
+    }
   }
 
   private activityTimer: any = null;
