@@ -16,6 +16,7 @@ export interface ViewEvents {
   onToggleLoop: () => void;
   onVolumeChange: (volume: number) => void;
   onClientChange: (clientId: string) => void;
+  onThemeChange: (theme: string) => void;
 }
 
 export class AppView {
@@ -48,6 +49,7 @@ export class AppView {
   private closeSettingsBtn = document.getElementById('close-settings-btn') as HTMLButtonElement;
   private volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
   private clientSelector = document.getElementById('client-selector') as HTMLSelectElement;
+  private themeSelector = document.getElementById('theme-selector') as HTMLSelectElement;
 
   private visualizer: any = null;
   private presets: any = null;
@@ -111,6 +113,11 @@ export class AppView {
 
     this.clientSelector.onchange = () => {
       this.events.onClientChange(this.clientSelector.value);
+    };
+    
+    this.themeSelector.onchange = () => {
+      this.setTheme(this.themeSelector.value);
+      this.events.onThemeChange(this.themeSelector.value);
     };
 
     window.onresize = () => this.resizeVisualizer();
@@ -376,5 +383,11 @@ export class AppView {
     window.addEventListener('mousemove', handleActivity);
     window.addEventListener('keydown', handleActivity);
     handleActivity();
+  }
+
+  public setTheme(theme: string) {
+    document.body.classList.remove('theme-neon', 'theme-sunset', 'theme-forest', 'theme-midnight');
+    document.body.classList.add(theme);
+    this.themeSelector.value = theme;
   }
 }

@@ -14,6 +14,8 @@ export class AppController {
   private chunksReceivedCount = 0;
   private playbackStatus: 'playing' | 'paused' | 'stopped' = 'stopped';
   private currentStreamId: string | null = null;
+  private playbackShuffle = false;
+  private playbackLoop: 'none' | 'track' | 'playlist' = 'none';
 
   constructor() {
     this.view = new AppView({
@@ -33,6 +35,11 @@ export class AppController {
       onPrev: () => this.handleControl('previous'),
       onNext: () => this.handleControl('next'),
       onTogglePlay: () => this.handleControl(this.playbackStatus === 'playing' ? 'pause' : 'play'),
+      onToggleShuffle: () => this.handlePlaybackShuffle(),
+      onToggleLoop: () => this.handlePlaybackLoop(),
+      onVolumeChange: (volume) => this.handleVolumeChange(volume),
+      onClientChange: (clientId) => this.handleClientChange(clientId),
+      onThemeChange: (theme) => this.saveSettings(),
     });
 
     this.loadSettings();
@@ -47,6 +54,7 @@ export class AppController {
         this.view.setServerUrl(settings.serverUrl || 'http://localhost:1780');
         if (settings.aa !== undefined) this.view.setAA(settings.aa);
         if (settings.scale !== undefined) this.view.setScale(settings.scale);
+        if (settings.theme !== undefined) this.view.setTheme(settings.theme);
         // We don't auto-connect, but we prepare the UI.
       } catch (e) {
         console.error('Failed to load settings', e);
@@ -59,6 +67,9 @@ export class AppController {
       serverUrl: this.view.getServerUrl(),
       aa: this.view.getAA(),
       scale: this.view.getScale(),
+      theme: document.body.classList.contains('theme-sunset') ? 'theme-sunset' : 
+             (document.body.classList.contains('theme-forest') ? 'theme-forest' : 
+             (document.body.classList.contains('theme-midnight') ? 'theme-midnight' : 'theme-neon')),
     };
     localStorage.setItem('buttersync-settings', JSON.stringify(settings));
   }
@@ -124,17 +135,23 @@ export class AppController {
 
       this.saveSettings();
       const status = await this.controlClient.getStatus();
-      if (status.server && status.server.streams) {
-        this.view.updateStreams(status.server.streams);
+      if (status.server) {
+        if (status.server.streams) {
+          this.view.updateStreams(status.server.streams);
+        }
+        // Extract all clients from all groups
+        const allClients = status.server.groups.flatMap((g: any) => g.clients);
+        this.view.updateClients(allClients);
       }
     } catch (e) {
-      console.error('Failed to load streams', e);
+      console.error('Failed to load status', e);
     } finally {
       this.view.setLoadStreamsLoading(false);
     }
   }
 
-  private handleNotification(note: any) {
+  public handleNotification(note: any) {
+    (window as any).lastNote = note;
     console.log('Notification received:', note.method, note.params);
     switch (note.method) {
       case 'Stream.OnUpdate':
@@ -153,15 +170,23 @@ export class AppController {
       case 'Stream.OnProperties':
         if (note.params.id === this.currentStreamId) {
           const props = note.params;
-          if (props.metadata) this.updateMediaMetadata(props.metadata);
-          if (props.playbackStatus) this.updatePlaybackState(props.playbackStatus, props);
+          if (props.metadata) this.updateMediaMetadata(props.metadata, props.position);
+          if (props.playbackStatus) {
+            this.updatePlaybackState(props.playbackStatus, props);
+          } else if (props.position !== undefined) {
+             // If only position changed
+             this.updatePlaybackState(this.playbackStatus, props);
+          }
         }
         break;
       case 'Server.OnUpdate':
         this.handleLoadStreams(this.view.getServerUrl());
         break;
       case 'Client.OnVolumeChanged':
-        // Optional: show volume HUD
+      case 'Client.OnConnect':
+      case 'Client.OnDisconnect':
+        // Update client list for connection changes
+        this.handleLoadStreams(this.view.getServerUrl());
         break;
     }
   }
@@ -174,6 +199,48 @@ export class AppController {
         console.error(`Failed to send ${command} command`, e);
       }
     }
+  }
+
+  private async handlePlaybackShuffle() {
+    if (this.controlClient && this.currentStreamId) {
+      try {
+        const nextShuffle = !this.playbackShuffle;
+        await this.controlClient.setStreamProperty(this.currentStreamId, 'shuffle', nextShuffle);
+      } catch (e) {
+        console.error('Failed to toggle shuffle', e);
+      }
+    }
+  }
+
+  private async handlePlaybackLoop() {
+    if (this.controlClient && this.currentStreamId) {
+      try {
+        const loopModes: Array<'none' | 'track' | 'playlist'> = ['none', 'track', 'playlist'];
+        const currentIdx = loopModes.indexOf(this.playbackLoop);
+        const nextLoop = loopModes[(currentIdx + 1) % loopModes.length];
+        await this.controlClient.setStreamProperty(this.currentStreamId, 'loopStatus', nextLoop);
+      } catch (e) {
+        console.error('Failed to toggle loop', e);
+      }
+    }
+  }
+
+  private async handleVolumeChange(volume: number) {
+    if (this.controlClient) {
+      // If we have a current client ID, set its volume. 
+      // For now, let's assume we are controlling 'this browser' client if we can identify it, 
+      // or the first connected client.
+      const status = await this.controlClient.getStatus();
+      const clientId = status.server.groups[0]?.clients[0]?.id; // Fallback
+      if (clientId) {
+        await this.controlClient.setClientVolume(clientId, volume);
+      }
+    }
+  }
+
+  private async handleClientChange(clientId: string) {
+    // Logic to focus on a different client's volume or state if needed
+    console.log('Selected client:', clientId);
   }
 
   private initMediaSession() {
@@ -216,38 +283,43 @@ export class AppController {
     });
   }
 
-  private updateMediaMetadata(metadata?: any) {
-    if (!metadata || !('mediaSession' in navigator)) return;
+  private updateMediaMetadata(metadata?: any, position?: number) {
+    if (!metadata) return;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: metadata.title || 'Live Stream',
-      artist: metadata.artist?.join(', ') || 'Snapcast',
-      album: metadata.album || '',
-      artwork: metadata.artUrl ? [{ src: metadata.artUrl }] : []
-    });
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: metadata.title || 'Live Stream',
+        artist: Array.isArray(metadata.artist) ? metadata.artist.join(', ') : (metadata.artist || 'Snapcast'),
+        album: metadata.album || '',
+        artwork: metadata.artUrl ? [{ src: metadata.artUrl }] : []
+      });
+    }
 
     this.view.updateMetadata({
       title: metadata.title,
-      artist: metadata.artist?.join(', '),
-      art: metadata.artUrl
+      artist: Array.isArray(metadata.artist) ? metadata.artist.join(', ') : metadata.artist,
+      art: metadata.artUrl,
+      position: position !== undefined ? position / 1000 : undefined,
+      duration: metadata.duration !== undefined ? metadata.duration / 1000 : undefined
     });
   }
 
-  private updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
+  public updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
     this.playbackStatus = status;
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : (status === 'paused' ? 'paused' : 'none');
-      
-      if (properties && properties.metadata && properties.metadata.duration) {
-        try {
+    
+    if (typeof navigator !== 'undefined' && navigator.mediaSession) {
+      try {
+        navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : (status === 'paused' ? 'paused' : 'none');
+        
+        if (properties?.metadata?.duration && typeof navigator.mediaSession.setPositionState === 'function') {
           navigator.mediaSession.setPositionState({
             duration: properties.metadata.duration / 1000,
             playbackRate: properties.rate || 1,
             position: Math.min(properties.position / 1000, properties.metadata.duration / 1000)
           });
-        } catch (e) {
-          console.error('Failed to set position state', e);
         }
+      } catch (e) {
+        console.error('MediaSession update failed', e);
       }
     }
 
@@ -258,6 +330,27 @@ export class AppController {
     }
 
     this.view.setPlaybackStatus(status);
+    
+    if (properties) {
+      if (properties.position !== undefined && properties.metadata?.duration !== undefined) {
+        this.view.updateProgress(properties.position / 1000, properties.metadata.duration / 1000);
+      }
+      
+      // Update shuffle/loop buttons if present in properties
+      if (properties.shuffle !== undefined) {
+          this.playbackShuffle = properties.shuffle;
+      }
+      if (properties.loopStatus !== undefined) {
+          this.playbackLoop = properties.loopStatus;
+      }
+
+      if (properties.shuffle !== undefined || properties.loopStatus !== undefined) {
+          this.view.setPlaybackModes(
+              this.playbackShuffle, 
+              this.playbackLoop
+          );
+      }
+    }
   }
 
   private handleShuffle() {
