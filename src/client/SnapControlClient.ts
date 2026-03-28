@@ -51,14 +51,17 @@ export class SnapControlClient extends EventTarget {
       if (pending) {
         this.pendingRequests.delete(res.id);
         if (res.error) {
+          console.debug('SnapControl JSON-RPC Error:', res.id, res.error);
           pending.reject(res.error);
         } else {
+          console.debug('SnapControl JSON-RPC Response:', res.id, res.result);
           pending.resolve(res.result);
         }
       }
     } else {
       // Notification
       const note = data as JsonRpcNotification;
+      console.debug('SnapControl JSON-RPC Notification:', note.method, note.params);
       this.dispatchEvent(new CustomEvent('notification', { detail: note }));
       this.dispatchEvent(new CustomEvent(note.method, { detail: note.params }));
     }
@@ -79,6 +82,7 @@ export class SnapControlClient extends EventTarget {
 
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(id, { resolve, reject });
+      console.debug('SnapControl JSON-RPC Request:', request.method, request.params, `(id: ${id})`);
       this.socket!.send(JSON.stringify(request));
     });
   }

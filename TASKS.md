@@ -1,4 +1,4 @@
-# Stream Plugin Implementation Tasks
+# Stream Plugin & HUD Implementation Status
 
 ## 1. Communication Infrastructure [COMPLETED]
 - [x] **I/O Standard**: Establish a bidirectional, newline-delimited (NDJSON) stream using `stdin` (RX) and `stdout` (TX).
@@ -34,3 +34,9 @@ The plugin must maintain and report these boolean flags:
 - [x] **Fractional Position Tracking**: Track and report `position` as a floating-point number (seconds).
 - [x] **Embedded Art Support**: (Optional) Support `artData` as Base64 JSON.
 - [x] **Error Protocol**: Return standard JSON-RPC 2.0 error objects (e.g., `-32601`, `-32602`).
+
+## 6. HUD Integration & E2E Validation [COMPLETED]
+- [x] **Metadata HUD**: Real-time title/artist/album updates via `Stream.OnProperties`.
+- [x] **High-Fidelity Progress Bar**: Neon glow bar with reactive synchronization.
+- [x] **Album Art Rendering**: Support artUrl-based preview within the HUD.
+- [x] **E2E Validation Suite**: 7/7 passing tests in Cypress (HUD, MediaSession, State Sync).

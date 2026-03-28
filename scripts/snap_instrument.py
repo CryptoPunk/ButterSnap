@@ -25,6 +25,7 @@ USAGE EXAMPLES:
    python3 scripts/snap_instrument.py status paused
    python3 scripts/snap_instrument.py status playing
    python3 scripts/snap_instrument.py props '{"volume": 85, "shuffle": true}'
+   python3 scripts/snap_instrument.py log "System check passed" --severity notice
 """
 
 class SnapPlugin:
@@ -60,6 +61,8 @@ class SnapPlugin:
             "method": method,
             "params": params
         }
+        sys.stderr.write(f"TX Notification: {method} {params}\n")
+        sys.stderr.flush()
         print(json.dumps(msg), flush=True)
 
     def send_response(self, req_id, result=None, error=None):
@@ -70,8 +73,11 @@ class SnapPlugin:
         }
         if error:
             msg["error"] = error
+            sys.stderr.write(f"TX Error: {req_id} {error}\n")
         else:
             msg["result"] = result or "ok"
+            sys.stderr.write(f"TX Response: {req_id} {msg['result']}\n")
+        sys.stderr.flush()
         sys.stdout.write(json.dumps(msg) + "\n")
         sys.stdout.flush()
 
@@ -109,6 +115,9 @@ class SnapPlugin:
         method = req.get("method")
         params = req.get("params", {})
         req_id = req.get("id")
+
+        sys.stderr.write(f"RX Request: {method} {params} (id: {req_id})\n")
+        sys.stderr.flush()
 
         if method == "Plugin.Stream.Player.GetProperties":
             with self.lock:
@@ -191,6 +200,9 @@ class SnapPlugin:
                             self.state["playbackStatus"] = cmd["status"]
                         if "properties" in cmd:
                             self.state.update(cmd["properties"])
+                        if "log" in cmd:
+                            l = cmd["log"]
+                            self.log(l.get("message", ""), l.get("severity", "Info"))
                     self.notify_properties()
                 conn.close()
             except Exception as e:
@@ -220,6 +232,11 @@ def command_mode():
     # Props command (raw)
     props = subparsers.add_parser("props")
     props.add_argument("json", help="Raw JSON properties")
+    
+    # Log command
+    log = subparsers.add_parser("log")
+    log.add_argument("message", help="Log message")
+    log.add_argument("--severity", choices=['trace', 'debug', 'info', 'notice', 'warning', 'error', 'fatal'], default='info')
 
     args = parser.parse_args()
     if not args.command and not sys.argv[1:]:
@@ -243,6 +260,8 @@ def command_mode():
         cmd["status"] = args.value
     elif args.command == "props":
         cmd["properties"] = json.loads(args.json)
+    elif args.command == "log":
+        cmd["log"] = {"message": args.message, "severity": args.severity.capitalize()}
     
     if not cmd:
         # Fallback for old simple-arg mode if needed, but let's stick to subparsers

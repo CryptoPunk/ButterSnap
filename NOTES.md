@@ -26,3 +26,8 @@
 ## Troubleshooting
 - **Port Mismatch**: Snapserver uses port `1705` for raw TCP Control but port `1780` for HTTP/WebSocket traffic. Always connect the browser/web client to **port 1780**.
 - **Protocol Error**: Some Snapserver versions may reject specific subprotocol strings like `'binary'`. Standard `SnapClient` should use a default subprotocol.
+
+## Debugging & Observability
+- **JSON-RPC Logs (Client)**: Open the browser's developer console to see `SnapControl JSON-RPC` debug logs. These track every request, response, and notification between the HUD and the Snapserver.
+- **JSON-RPC Logs (Plugin)**: The `snap_instrument.py` script logs its internal JSON-RPC traffic (`RX Request`, `TX Notification`, `TX Response`) to `stderr`. This can be viewed in the terminal output of `bun run dev`. 
+- **Last Notification (Client)**: At any time, you can inspect `window.lastNote` in the browser console for a shortcut to the most recently received Snapcast notification payload.

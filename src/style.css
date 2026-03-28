@@ -1,4 +1,4 @@
-@import "@phosphor-icons/web/src/regular/style.css";
+/* style.css */
 
 :root {
   --bg-color: #0d0d0d;
@@ -326,35 +326,39 @@ h1::first-letter {
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
 }
 
-#play-pause-btn {
-  font-size: 1.8rem;
-  width: 64px;
-  height: 64px;
-  background: var(--accent-primary);
-  color: #000;
-  border: none;
-  box-shadow: 0 0 20px var(--glow-color);
+/* Icon Decoupling with UnoCSS */
+#play-pause-btn .icon {
+  display: block;
+  width: 1.8rem;
+  height: 1.8rem;
+  @apply icon-play;
 }
+#play-pause-btn.playing .icon { @apply icon-pause; }
 
-/* Icon Decoupling */
-#play-pause-btn .icon-pause { display: none; }
-#play-pause-btn.playing .icon-play { display: none; }
-#play-pause-btn.playing .icon-pause { display: block; }
+#playback-loop-btn .icon {
+  display: block;
+  width: 1.4rem;
+  height: 1.4rem;
+  @apply icon-loop-playlist;
+}
+#playback-loop-btn.loop-track .icon { @apply icon-loop-track; }
+#playback-loop-btn.loop-none .icon { @apply icon-loop-none; }
 
-#playback-loop-btn .icon-loop-track,
-#playback-loop-btn .icon-loop-none { display: none; }
+#playback-shuffle-btn .icon { @apply icon-shuffle; }
+#prev-btn .icon { @apply icon-prev; }
+#next-btn .icon { @apply icon-next; }
 
-#playback-loop-btn.loop-track .icon-loop-playlist,
-#playback-loop-btn.loop-track .icon-loop-none { display: none; }
-#playback-loop-btn.loop-track .icon-loop-track { display: block; }
+#fullscreen-btn .icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  @apply icon-windowed;
+}
+#fullscreen-btn.fullscreen .icon { @apply icon-fullscreen; }
 
-#playback-loop-btn.loop-none .icon-loop-playlist,
-#playback-loop-btn.loop-none .icon-loop-track { display: none; }
-#playback-loop-btn.loop-none .icon-loop-none { display: block; }
-
-#fullscreen-btn .icon-fullscreen { display: none; }
-#fullscreen-btn.fullscreen .icon-windowed { display: none; }
-#fullscreen-btn.fullscreen .icon-fullscreen { display: block; }
+#volume-icon .icon { @apply icon-volume; }
+#visual-settings-btn .icon { @apply icon-gear; }
+#close-settings-btn .icon { @apply icon-close; }
 
 
 #play-pause-btn:hover {
