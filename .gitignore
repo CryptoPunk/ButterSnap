@@ -38,3 +38,6 @@ node_modules/
 *.local
 
 tmp
+
+# Testing artifacts
+cypress/screenshots
