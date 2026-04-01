@@ -37,3 +37,7 @@ bun test
 - `jsr.json`: JSR configuration
 - `vite.config.ts`: Vite build settings
 - `package.json`: Main project configuration
+
+
+## Testing
+song.mp3 CC-BY-SA from ccmixter.org https://ccmixter.org/files/cdk/70638

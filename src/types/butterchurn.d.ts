@@ -2,6 +2,8 @@ declare module 'butterchurn' {
   export interface VisualizerOptions {
     width: number;
     height: number;
+    mesh_width?: number;
+    mesh_height?: number;
     pixelRatio?: number;
     textureRatio?: number;
   }
@@ -11,7 +13,6 @@ declare module 'butterchurn' {
     connectAudio(audioNode: AudioNode | AnalyserNode): void;
     loadPreset(preset: any, blendTime?: number): void;
     setOptions(options: VisualizerOptions): void;
-    setRendererSize(width: number, height: number, options: any): void;
     setOutputAA(enabled: boolean): void;
     setInternalMeshSize(width: number, height: number): void;
     loadExtraImages(images: { [key: string]: string }): Promise<void>;

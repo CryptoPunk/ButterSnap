@@ -94,11 +94,11 @@ export class AppView {
     this.playPauseBtn.onclick = () => this.events.onTogglePlay();
     this.playbackShuffleBtn.onclick = () => this.events.onToggleShuffle();
     this.playbackLoopBtn.onclick = () => this.events.onToggleLoop();
-    
+
     this.initActivityTracker();
-    
+
     this.fullscreenBtn.onclick = () => this.toggleFullscreen();
-    
+
     this.visualSettingsBtn.onclick = () => {
       this.visualSettingsPanel.classList.toggle('hidden');
     };
@@ -114,14 +114,14 @@ export class AppView {
     this.clientSelector.onchange = () => {
       this.events.onClientChange(this.clientSelector.value);
     };
-    
+
     this.themeSelector.onchange = () => {
       this.setTheme(this.themeSelector.value);
       this.events.onThemeChange(this.themeSelector.value);
     };
 
     window.onresize = () => this.resizeVisualizer();
-    
+
     window.addEventListener('keydown', (e) => {
       if (e.key.toLowerCase() === 'f' && e.target === document.body) {
         this.toggleFullscreen();
@@ -135,14 +135,14 @@ export class AppView {
   }
 
   public initVisualizer(audioContext: AudioContext, analyzer: AnalyserNode) {
-    const scale = parseFloat(this.scaleSelector.value);
     this.visualizer = butterchurn.createVisualizer(audioContext, this.canvas, {
-      width: this.canvas.clientWidth,
-      height: this.canvas.clientHeight,
-      pixelRatio: (window.devicePixelRatio * 2) || 1,
-      textureRatio: scale,
+      width: 1920,
+      height: 1080,
+      mesh_width: 1920 / 20,
+      mesh_height: 1080 / 20,
+      pixelRatio: 1,
+      textureRatio: 1,
     });
-
     this.visualizer.connectAudio(analyzer);
 
     const presetNames = Object.keys(this.presets);
@@ -215,27 +215,14 @@ export class AppView {
     this.loadPreset(random);
   }
 
-  private resizeVisualizer() {
-    if (!this.visualizer) return;
-    let scale = parseFloat(this.scaleSelector.value);
-    let trueWidth = this.canvas.clientWidth * window.devicePixelRatio;
-    let trueHeight = this.canvas.clientHeight * window.devicePixelRatio;
-    let meshScale = 10; // Copied from main.ts
-    console.log("trueWidth", trueWidth, "trueHeight", trueHeight, "scale", scale, "pixelRatio", window.devicePixelRatio);
-    this.visualizer.setRendererSize(this.canvas.clientWidth, this.canvas.clientHeight, {
-      pixelRatio: (window.devicePixelRatio * 2) || 1,
-      textureRatio: scale,
-      meshWidth: Math.ceil(trueWidth / meshScale),
-      meshHeight: Math.ceil(trueHeight / meshScale),
-    });
-  }
+
 
   public updateStatus(state: string) {
     const isConnected = state === 'CONNECTED' || state === 'CONNECTING' || state === 'RECONNECTING';
     this.statusText.innerText = state;
     this.statusIndicator.className = `status-${state.toLowerCase()}`;
     this.connectBtn.innerText = isConnected ? 'Disconnect' : 'Connect';
-    
+
     // Hide server config when connected to clean up UI (now with animation)
     this.serverInput.classList.toggle('hidden-config', isConnected);
     this.loadStreamsBtn.classList.toggle('hidden-config', isConnected);
@@ -250,7 +237,7 @@ export class AppView {
     this.metadataArea.classList.remove('hidden');
     this.trackTitle.innerText = metadata.title || 'Unknown Title';
     this.trackArtist.innerText = metadata.artist || 'Unknown Artist';
-    
+
     if (metadata.art) {
       this.albumArt.src = metadata.art;
       this.albumArt.style.display = 'block';
@@ -276,11 +263,11 @@ export class AppView {
 
   public setPlaybackModes(shuffle: boolean, loopStatus: string) {
     this.playbackShuffleBtn.classList.toggle('active', shuffle);
-    
+
     this.playbackLoopBtn.classList.remove('loop-none', 'loop-track', 'loop-playlist');
     this.playbackLoopBtn.classList.add(`loop-${loopStatus}`);
     this.playbackLoopBtn.classList.toggle('active', loopStatus !== 'none');
-    
+
     this.playbackLoopBtn.title = `Looping: ${loopStatus}`;
   }
 
@@ -361,7 +348,7 @@ export class AppView {
     const isFS = !!document.fullscreenElement;
     this.fullscreenBtn.classList.toggle('fullscreen', isFS);
     this.fullscreenBtn.classList.toggle('active', isFS);
-    
+
     const textSpan = this.fullscreenBtn.querySelector('.btn-text');
     if (textSpan) {
       textSpan.textContent = isFS ? 'Exit Fullscreen' : 'Fullscreen';

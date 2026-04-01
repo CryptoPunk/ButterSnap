@@ -1,5 +1,6 @@
 /**
- * ButterSync: A skeleton TypeScript repository using Bun, Vite, and JSR.
+
+* ButterSync: A skeleton TypeScript repository using Bun, Vite, and JSR.
  */
 
 export const sync = async (message: string): Promise<string> => {
