@@ -64,12 +64,10 @@
                     </div>
                     <div class="control-group">
                         <label>Anti-Aliasing</label>
-                        <div class="aa-control">
-                            <label class="switch">
-                                <input type="checkbox" id="aa-checkbox">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="aa-checkbox">
+                            <span class="slider"></span>
+                        </label>
                     </div>
                     <div class="control-group">
                         <button id="fullscreen-btn">
@@ -91,11 +89,11 @@
 
                 <div class="central-controls">
                     <div class="playback-buttons">
-                        <button id="playback-shuffle-btn" class="icon-btn state-btn"><span class="icon"></span></button>
+                        <button id="playback-shuffle-btn" class="icon-btn"><span class="icon"></span></button>
                         <button id="prev-btn" class="icon-btn"><span class="icon"></span></button>
                         <button id="play-pause-btn" class="icon-btn"><span class="icon"></span></button>
                         <button id="next-btn" class="icon-btn"><span class="icon"></span></button>
-                        <button id="playback-loop-btn" class="icon-btn state-btn"><span class="icon"></span></button>
+                        <button id="playback-loop-btn" class="icon-btn"><span class="icon"></span></button>
                     </div>
                     <div id="progress-container">
                         <div id="progress-bar"></div>
@@ -118,10 +116,6 @@
                 </div>
             </div>
         </main>
-
-        <footer>
-            <!-- Debug info moved to HUD -->
-        </footer>
     </div>
     <script type="module" src="./src/main.ts"></script>
 </body>

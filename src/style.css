@@ -67,7 +67,7 @@ header {
   left: 0;
   right: 0;
   padding: 1.5rem 3rem;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 80%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 80%, transparent 100%);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -131,9 +131,20 @@ h1::first-letter {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .server-controls {
@@ -146,7 +157,7 @@ h1::first-letter {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -157,14 +168,8 @@ h1::first-letter {
 
 .hud-panel {
   position: absolute;
-  background: var(--panel-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
   z-index: 100;
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  @apply glass-panel;
 }
 
 #visual-settings-panel {
@@ -201,7 +206,7 @@ h1::first-letter {
 
 .close-btn {
   background: transparent;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 1.5rem;
   padding: 0;
   border-radius: 50%;
@@ -214,7 +219,7 @@ h1::first-letter {
 
 .close-btn:hover {
   color: white;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .control-group {
@@ -228,10 +233,11 @@ h1::first-letter {
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 700;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.control-group select, .control-group button {
+.control-group select,
+.control-group button {
   width: 100%;
 }
 
@@ -246,7 +252,6 @@ h1::first-letter {
   grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
   gap: 4rem;
-  transform: none;
   border-bottom: none;
 }
 
@@ -299,31 +304,11 @@ h1::first-letter {
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 1.4rem;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: white;
-  border: 1px solid rgba(255,255,255,0.1);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: scale(1.1);
-  border-color: var(--accent-secondary);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  @apply icon-btn;
 }
 
 .icon-btn.active {
-  color: var(--accent-secondary);
-  border-color: var(--accent-secondary);
-  background: rgba(0, 229, 255, 0.1);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  @apply icon-btn-active;
 }
 
 /* Icon Decoupling with UnoCSS */
@@ -333,7 +318,10 @@ h1::first-letter {
   height: 1.8rem;
   @apply icon-play;
 }
-#play-pause-btn.playing .icon { @apply icon-pause; }
+
+#play-pause-btn.playing .icon {
+  @apply icon-pause;
+}
 
 #playback-loop-btn .icon {
   display: block;
@@ -341,12 +329,26 @@ h1::first-letter {
   height: 1.4rem;
   @apply icon-loop-playlist;
 }
-#playback-loop-btn.loop-track .icon { @apply icon-loop-track; }
-#playback-loop-btn.loop-none .icon { @apply icon-loop-none; }
 
-#playback-shuffle-btn .icon { @apply icon-shuffle; }
-#prev-btn .icon { @apply icon-prev; }
-#next-btn .icon { @apply icon-next; }
+#playback-loop-btn.loop-track .icon {
+  @apply icon-loop-track;
+}
+
+#playback-loop-btn.loop-none .icon {
+  @apply icon-loop-none;
+}
+
+#playback-shuffle-btn .icon {
+  @apply icon-shuffle;
+}
+
+#prev-btn .icon {
+  @apply icon-prev;
+}
+
+#next-btn .icon {
+  @apply icon-next;
+}
 
 #fullscreen-btn .icon {
   display: inline-block;
@@ -354,11 +356,22 @@ h1::first-letter {
   margin-right: 0.5rem;
   @apply icon-windowed;
 }
-#fullscreen-btn.fullscreen .icon { @apply icon-fullscreen; }
 
-#volume-icon .icon { @apply icon-volume; }
-#visual-settings-btn .icon { @apply icon-gear; }
-#close-settings-btn .icon { @apply icon-close; }
+#fullscreen-btn.fullscreen .icon {
+  @apply icon-fullscreen;
+}
+
+#volume-icon .icon {
+  @apply icon-volume;
+}
+
+#visual-settings-btn .icon {
+  @apply icon-gear;
+}
+
+#close-settings-btn .icon {
+  @apply icon-close;
+}
 
 
 #play-pause-btn:hover {
@@ -441,15 +454,6 @@ h1::first-letter {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.aa-control {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.7);
-  font-weight: 700;
-  letter-spacing: 1px;
-}
 
 .switch {
   position: relative;
@@ -471,10 +475,10 @@ h1::first-letter {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
   transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .slider:before {
@@ -487,16 +491,16 @@ h1::first-letter {
   background-color: #fff;
   transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--accent-secondary);
   border-color: rgba(0, 229, 255, 0.5);
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(18px);
 }
 
@@ -560,7 +564,7 @@ button {
 
 .server-controls button {
   background: transparent;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   padding: 0.6rem 1.2rem;
   font-size: 0.85rem;
   border-radius: 10px;
@@ -583,9 +587,9 @@ button {
 }
 
 #shuffle-btn {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--accent-secondary);
-  border: 1px solid rgba(0,229,255,0.3);
+  border: 1px solid rgba(0, 229, 255, 0.3);
 }
 
 #shuffle-btn:hover {
@@ -596,7 +600,7 @@ button {
 #fullscreen-btn {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0;
   width: 44px;
   height: 44px;
@@ -644,14 +648,10 @@ main {
   display: block;
 }
 
-footer {
- display: none;
-}
 
 /* Inactivity handling */
 body.inactive header,
-body.inactive .hud-panel,
-body.inactive footer {
+body.inactive .hud-panel {
   opacity: 0;
   transform: translateY(-30px);
   pointer-events: none;

@@ -32,3 +32,9 @@
 - **JSON-RPC Logs (Plugin)**: The `snap_instrument.py` script logs its internal JSON-RPC traffic (`RX Request`, `TX Notification`, `TX Response`) to `stderr`. This can be viewed in the terminal output of `bun run dev`. 
 - **Last Notification (Client)**: At any time, you can inspect `window.lastNote` in the browser console for a shortcut to the most recently received Snapcast notification payload.
 - **Butterchurn ESM Interop**: In Vite, `import butterchurn from 'butterchurn'` may return a module object with a `.default` property instead of the `Butterchurn` class directly. Always check for `.default` or use a robust access pattern to avoid `createVisualizer is undefined`.
+
+## UI Refactoring (2026-04-01)
+- Removed redundant `<footer>` and `state-btn` classes from `index.html`.
+- Consolidated `btn-icon` and `icon-btn` shortcuts in `uno.config.ts`.
+- Refactored `style.css` to use `@apply` for shared styles (`glass-panel`, `icon-btn`), reducing manual CSS boilerplate.
+- Cleaned up unused properties and commented code in `AppView.ts` (removed `chunk-count` and `latency` display references which were missing from HTML).

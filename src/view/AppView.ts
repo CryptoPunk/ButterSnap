@@ -30,8 +30,6 @@ export class AppView {
   private aaCheckbox = document.getElementById('aa-checkbox') as HTMLInputElement;
   private loadStreamsBtn = document.getElementById('load-streams-btn') as HTMLButtonElement;
   private streamSelector = document.getElementById('stream-selector') as HTMLSelectElement;
-  private chunkCounter = document.getElementById('chunk-count') as HTMLElement;
-  private latencyDisplay = document.getElementById('latency') as HTMLElement;
   private fullscreenBtn = document.getElementById('fullscreen-btn') as HTMLButtonElement;
   private prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
   private nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
@@ -56,7 +54,6 @@ export class AppView {
 
   constructor(private events: ViewEvents) {
     this.initListeners();
-    //this.presets = (butterchurnPresets as any).getPresets ? butterchurnPresets.getPresets() : (butterchurnPresets as any).default.getPresets();
     this.presets = getButterchurnPresets();
     this.populatePresets();
   }
@@ -296,13 +293,9 @@ export class AppView {
   }
 
   public setLoadStreamsLoading(loading: boolean) {
-    //this.loadStreamsBtn.disabled = loading;
-    //this.loadStreamsBtn.innerText = loading ? '...' : 'List';
   }
 
   public updateDebugInfo(chunks: number, latency: number) {
-    //this.chunkCounter.innerText = chunks.toString();
-    //this.latencyDisplay.innerText = latency.toString();
   }
 
   public setAA(enabled: boolean) {

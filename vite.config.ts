@@ -6,7 +6,7 @@ import dts from 'vite-plugin-dts';
 export default defineConfig({
   plugins: [
     UnoCSS(),
-    dts({ 
+    dts({
       insertTypesEntry: true,
       include: ['src/**/*.ts'],
       exclude: ['**/*.test.ts', 'cypress/**/*']
@@ -21,7 +21,7 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [
-        'butterchurn', 
+        'butterchurn',
         'butterchurn-presets',
         '@wasm-audio-decoders/flac',
         '@wasm-audio-decoders/ogg-vorbis',
