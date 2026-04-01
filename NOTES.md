@@ -31,3 +31,4 @@
 - **JSON-RPC Logs (Client)**: Open the browser's developer console to see `SnapControl JSON-RPC` debug logs. These track every request, response, and notification between the HUD and the Snapserver.
 - **JSON-RPC Logs (Plugin)**: The `snap_instrument.py` script logs its internal JSON-RPC traffic (`RX Request`, `TX Notification`, `TX Response`) to `stderr`. This can be viewed in the terminal output of `bun run dev`. 
 - **Last Notification (Client)**: At any time, you can inspect `window.lastNote` in the browser console for a shortcut to the most recently received Snapcast notification payload.
+- **Butterchurn ESM Interop**: In Vite, `import butterchurn from 'butterchurn'` may return a module object with a `.default` property instead of the `Butterchurn` class directly. Always check for `.default` or use a robust access pattern to avoid `createVisualizer is undefined`.

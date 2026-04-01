@@ -55,7 +55,6 @@ export class AppController {
         if (settings.aa !== undefined) this.view.setAA(settings.aa);
         if (settings.scale !== undefined) this.view.setScale(settings.scale);
         if (settings.theme !== undefined) this.view.setTheme(settings.theme);
-        // We don't auto-connect, but we prepare the UI.
       } catch (e) {
         console.error('Failed to load settings', e);
       }
@@ -67,9 +66,9 @@ export class AppController {
       serverUrl: this.view.getServerUrl(),
       aa: this.view.getAA(),
       scale: this.view.getScale(),
-      theme: document.body.classList.contains('theme-sunset') ? 'theme-sunset' : 
-             (document.body.classList.contains('theme-forest') ? 'theme-forest' : 
-             (document.body.classList.contains('theme-midnight') ? 'theme-midnight' : 'theme-neon')),
+      theme: document.body.classList.contains('theme-sunset') ? 'theme-sunset' :
+        (document.body.classList.contains('theme-forest') ? 'theme-forest' :
+          (document.body.classList.contains('theme-midnight') ? 'theme-midnight' : 'theme-neon')),
     };
     localStorage.setItem('buttersync-settings', JSON.stringify(settings));
   }
@@ -105,7 +104,7 @@ export class AppController {
     });
 
     await this.client.connect();
-    
+
     // Automatically load streams after connection to populate the selector
     this.handleLoadStreams(url);
   }
@@ -125,7 +124,7 @@ export class AppController {
       if (!this.controlClient || this.controlClient.baseUrl !== url) {
         if (this.controlClient) this.controlClient.disconnect();
         this.controlClient = new SnapControlClient(url);
-        
+
         this.controlClient.addEventListener('notification', (e: any) => {
           this.handleNotification(e.detail);
         });
@@ -174,8 +173,8 @@ export class AppController {
           if (props.playbackStatus) {
             this.updatePlaybackState(props.playbackStatus, props);
           } else if (props.position !== undefined) {
-             // If only position changed
-             this.updatePlaybackState(this.playbackStatus, props);
+            // If only position changed
+            this.updatePlaybackState(this.playbackStatus, props);
           }
         }
         break;
@@ -306,11 +305,11 @@ export class AppController {
 
   public updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
     this.playbackStatus = status;
-    
+
     if (typeof navigator !== 'undefined' && navigator.mediaSession) {
       try {
         navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : (status === 'paused' ? 'paused' : 'none');
-        
+
         if (properties?.metadata?.duration && typeof navigator.mediaSession.setPositionState === 'function') {
           navigator.mediaSession.setPositionState({
             duration: properties.metadata.duration / 1000,
@@ -330,25 +329,25 @@ export class AppController {
     }
 
     this.view.setPlaybackStatus(status);
-    
+
     if (properties) {
       if (properties.position !== undefined && properties.metadata?.duration !== undefined) {
         this.view.updateProgress(properties.position / 1000, properties.metadata.duration / 1000);
       }
-      
+
       // Update shuffle/loop buttons if present in properties
       if (properties.shuffle !== undefined) {
-          this.playbackShuffle = properties.shuffle;
+        this.playbackShuffle = properties.shuffle;
       }
       if (properties.loopStatus !== undefined) {
-          this.playbackLoop = properties.loopStatus;
+        this.playbackLoop = properties.loopStatus;
       }
 
       if (properties.shuffle !== undefined || properties.loopStatus !== undefined) {
-          this.view.setPlaybackModes(
-              this.playbackShuffle, 
-              this.playbackLoop
-          );
+        this.view.setPlaybackModes(
+          this.playbackShuffle,
+          this.playbackLoop
+        );
       }
     }
   }
@@ -384,7 +383,7 @@ export class AppController {
       buffer = this.audioContext.createBuffer(channels, frameCount, rate);
       const evenByteLength = chunk.payload.byteLength - (chunk.payload.byteLength % 2);
       const pcmData = new Int16Array(chunk.payload, 0, evenByteLength / 2);
-      
+
       for (let i = 0; i < frameCount; i++) {
         for (let ch = 0; ch < channels; ch++) {
           buffer.getChannelData(ch)[i] = pcmData[i * channels + ch] / 32768;

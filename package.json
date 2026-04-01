@@ -8,6 +8,8 @@
       "import": "./dist/index.js"
     }
   },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -18,8 +20,7 @@
     "lint": "tsc --noEmit",
     "check": "publint",
     "test": "bun test src index.test.ts",
-    "serve:snap": "./test/snapserver/run.sh",
-    "cypress:run": "cypress run"
+    "serve:snap": "./test/snapserver/run.sh"
   },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
@@ -30,7 +31,6 @@
     "@unocss/preset-uno": "^66.6.7",
     "@unocss/vite": "^66.6.7",
     "concurrently": "^9.2.1",
-    "cypress": "^15.13.0",
     "esbuild": "^0.27.4",
     "publint": "^0.3.18",
     "typescript": "^6.0.0-dev.20260324",

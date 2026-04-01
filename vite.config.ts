@@ -1,12 +1,16 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import dts from 'vite-plugin-dts';
 import UnoCSS from 'unocss/vite';
+import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
     UnoCSS(),
-    dts({ rollupTypes: true })
+    dts({ 
+      insertTypesEntry: true,
+      include: ['src/**/*.ts'],
+      exclude: ['**/*.test.ts', 'cypress/**/*']
+    }),
   ],
   build: {
     lib: {
@@ -15,13 +19,21 @@ export default defineConfig({
       fileName: 'index',
       formats: ['es'],
     },
-    target: 'esnext',
     rollupOptions: {
-      external: [], // Add external dependencies here
+      external: [
+        'butterchurn', 
+        'butterchurn-presets',
+        '@wasm-audio-decoders/flac',
+        '@wasm-audio-decoders/ogg-vorbis',
+        '@wasm-audio-decoders/opus-ml'
+      ],
+      output: {
+        globals: {
+          butterchurn: 'butterchurn',
+        },
+      },
     },
-    minify: 'esbuild', // Vite uses esbuild for minification by default
+    sourcemap: true,
+    minify: 'esbuild',
   },
-  // Note: Vite 6 is moving towards Rolldown. 
-  // Currently, it uses esbuild for dev/deps and Rollup for production builds.
-  // When Rolldown is stable, it will replace Rollup.
 });

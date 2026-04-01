@@ -1,5 +1,5 @@
 import butterchurn from 'butterchurn';
-import butterchurnPresets from 'butterchurn-presets';
+import { getPresets as getButterchurnPresets } from 'butterchurn-presets';
 
 export interface ViewEvents {
   onConnect: (url: string, streamId?: string) => void;
@@ -56,7 +56,8 @@ export class AppView {
 
   constructor(private events: ViewEvents) {
     this.initListeners();
-    this.presets = butterchurnPresets.getPresets();
+    //this.presets = (butterchurnPresets as any).getPresets ? butterchurnPresets.getPresets() : (butterchurnPresets as any).default.getPresets();
+    this.presets = getButterchurnPresets();
     this.populatePresets();
   }
 
@@ -120,8 +121,6 @@ export class AppView {
       this.events.onThemeChange(this.themeSelector.value);
     };
 
-    window.onresize = () => this.resizeVisualizer();
-
     window.addEventListener('keydown', (e) => {
       if (e.key.toLowerCase() === 'f' && e.target === document.body) {
         this.toggleFullscreen();
@@ -129,13 +128,18 @@ export class AppView {
     });
 
     document.addEventListener('fullscreenchange', () => {
-      this.resizeVisualizer();
       this.updateFullscreenButton();
     });
   }
 
   public initVisualizer(audioContext: AudioContext, analyzer: AnalyserNode) {
-    this.visualizer = butterchurn.createVisualizer(audioContext, this.canvas, {
+    if (!this.canvas) return;
+
+    const bc = (butterchurn as any).createVisualizer ? butterchurn : (butterchurn as any).default;
+    if (!bc || typeof bc.createVisualizer !== 'function') {
+      return;
+    }
+    this.visualizer = bc.createVisualizer(audioContext, this.canvas, {
       width: 1920,
       height: 1080,
       mesh_width: 1920 / 20,
@@ -292,13 +296,13 @@ export class AppView {
   }
 
   public setLoadStreamsLoading(loading: boolean) {
-    this.loadStreamsBtn.disabled = loading;
-    this.loadStreamsBtn.innerText = loading ? '...' : 'List';
+    //this.loadStreamsBtn.disabled = loading;
+    //this.loadStreamsBtn.innerText = loading ? '...' : 'List';
   }
 
   public updateDebugInfo(chunks: number, latency: number) {
-    this.chunkCounter.innerText = chunks.toString();
-    this.latencyDisplay.innerText = latency.toString();
+    //this.chunkCounter.innerText = chunks.toString();
+    //this.latencyDisplay.innerText = latency.toString();
   }
 
   public setAA(enabled: boolean) {
@@ -314,7 +318,6 @@ export class AppView {
 
   public setScale(scale: number) {
     this.scaleSelector.value = scale.toString();
-    this.resizeVisualizer();
   }
 
   public getScale(): number {

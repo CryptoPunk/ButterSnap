@@ -23,9 +23,18 @@ declare module 'butterchurn' {
     canvas: HTMLCanvasElement | OffscreenCanvas,
     options: VisualizerOptions
   ): Visualizer;
+
+  const butterchurn: {
+    createVisualizer: typeof createVisualizer;
+  };
+  export default butterchurn;
 }
 
 declare module 'butterchurn-presets' {
-  const presets: { [key: string]: any };
   export function getPresets(): { [key: string]: any };
+
+  const butterchurnPresets: {
+    getPresets: typeof getPresets;
+  };
+  export default butterchurnPresets;
 }
