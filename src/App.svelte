@@ -330,6 +330,7 @@
           <small>Coming Soon...</small>
         </div>
       </div>
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div class="resizer resizer-left" onmousedown={startDragLeft} role="separator" aria-orientation="vertical" tabindex="-1"></div>
     {/if}
 
@@ -605,6 +606,7 @@
   </main>
 
   {#if settingsVisible}
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div class="resizer resizer-right" onmousedown={startDragRight} role="separator" aria-orientation="vertical" tabindex="-1"></div>
     <div
       id="visual-settings-panel"
