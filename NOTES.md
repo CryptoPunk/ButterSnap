@@ -47,3 +47,6 @@
 - Refactored `style.css` to use `@apply` for shared styles (`glass-panel`, `icon-btn`), reducing manual CSS boilerplate.
 - Cleaned up unused properties and commented code in `AppView.ts` (removed `chunk-count` and `latency` display references which were missing from HTML).
 - Changed remote web fonts references to `@fontsource/outfit` for local file loading to improve offline capabilities and reduce external requests.
+
+## Build & Configuration (2026-04-02)
+- Added `target: 'esnext'` to `vite.config.ts` to support top-level await in library distribution, solving esbuild errors during `bun run build`.

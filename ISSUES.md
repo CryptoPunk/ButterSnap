@@ -3,3 +3,4 @@
 ## Open
 
 - **`OpusMLDecoder` API mismatch**: `@wasm-audio-decoders/opus-ml` exposes `decodeFrame()`/`decodeFrames()` rather than a generic `decode()`. The decoder field is typed `any` so this does not cause a runtime error today, but should be addressed by either using the correct API or switching to a library with a `decode()` interface. Tracked as a TypeScript lint warning in `SnapClient.ts`.
+- **`@fontsource/outfit` type warning**: Side-effect import in `src/main.ts` raises a TS2882 error during declaration file generation despite being a CSS-only package. Need to add a custom `.d.ts` declaration to suppress this lint in the distribution bundle.

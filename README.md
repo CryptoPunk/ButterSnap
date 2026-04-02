@@ -1,5 +1,7 @@
 # ButterSync
 
+**Primary Contact:** Max Vohra <max-oss@seattlenetworks.com>
+
 A modern TypeScript skeleton repository.
 
 ## Features
