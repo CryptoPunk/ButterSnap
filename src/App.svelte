@@ -103,7 +103,8 @@
     },
     updateStreamProperties(props) {
       if (props.canGoNext !== undefined) canGoNext = props.canGoNext;
-      if (props.canGoPrevious !== undefined) canGoPrevious = props.canGoPrevious;
+      if (props.canGoPrevious !== undefined)
+        canGoPrevious = props.canGoPrevious;
       if (props.canPlay !== undefined) canPlay = props.canPlay;
       if (props.canPause !== undefined) canPause = props.canPause;
       if (props.canControl !== undefined) canControl = props.canControl;
@@ -306,7 +307,6 @@
               placeholder="Snapserver URL"
               onblur={() => (isEditingUrl = false)}
               onkeydown={(e) => e.key === "Enter" && (isEditingUrl = false)}
-              autofocus
             />
           {/if}
         </div>
