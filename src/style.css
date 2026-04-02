@@ -667,54 +667,16 @@ body.inactive {
 }
 
 
-#icon-play {
-  background-image: icon('i-ph:play-fill');
-}
-
-#icon-pause {
-  background-image: icon('i-ph:pause-fill');
-}
-
-#icon-shuffle {
-  background-image: icon('i-ph:shuffle-bold');
-}
-
-#icon-prev {
-  background-image: icon('i-ph:skip-back-fill');
-}
-
-#icon-next {
-  background-image: icon('i-ph:skip-forward-fill');
-}
-
-#icon-loop-none {
-  background-image: icon('i-ph:prohibit-bold');
-}
-
-#icon-loop-track {
-  background-image: icon('i-ph:repeat-once-bold');
-}
-
-#icon-loop-playlist {
-  background-image: icon('i-ph:repeat-bold');
-}
-
-#icon-gear {
-  background-image: icon('i-ph:gear-six-fill');
-}
-
-#icon-close {
-  background-image: icon('i-ph:x-bold');
-}
-
-#icon-fullscreen {
-  background-image: icon('i-ph:corners-out-bold');
-}
-
-#icon-windowed {
-  background-image: icon('i-ph:corners-in-bold');
-}
-
-#icon-volume {
-  background-image: icon('i-ph:speaker-high-fill');
-}
+.icon-play { @apply i-ph:play-fill; }
+.icon-pause { @apply i-ph:pause-fill; }
+.icon-shuffle { @apply i-ph:shuffle-bold; }
+.icon-prev { @apply i-ph:skip-back-fill; }
+.icon-next { @apply i-ph:skip-forward-fill; }
+.icon-loop-none { @apply i-ph:prohibit-bold; }
+.icon-loop-track { @apply i-ph:repeat-once-bold; }
+.icon-loop-playlist { @apply i-ph:repeat-bold; }
+.icon-gear { @apply i-ph:gear-six-fill; }
+.icon-close { @apply i-ph:x-bold; }
+.icon-fullscreen { @apply i-ph:corners-out-bold; }
+.icon-windowed { @apply i-ph:corners-in-bold; }
+.icon-volume { @apply i-ph:speaker-high-fill; }

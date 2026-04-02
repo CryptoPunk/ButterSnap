@@ -13,6 +13,12 @@ export default defineConfig({
       include: ['./src/**/*.{html,js,ts,jsx,tsx,svelte}'],
     },
   },
+  safelist: [
+    'icon-play', 'icon-pause', 'icon-shuffle', 'icon-prev', 'icon-next',
+    'icon-loop-none', 'icon-loop-track', 'icon-loop-playlist',
+    'icon-gear', 'icon-close', 'icon-fullscreen', 'icon-windowed', 'icon-volume',
+    'icon-btn',
+  ],
   shortcuts: [
 
 
