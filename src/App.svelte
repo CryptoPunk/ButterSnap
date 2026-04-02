@@ -162,10 +162,10 @@
     <div class="header-controls">
       <div class="server-controls">
         <input type="text" bind:value={serverUrl} placeholder="Snapserver URL">
-        <button onclick={() => appController.handleLoadStreams(serverUrl)} disabled={loadStreamsLoading}>
+        <button onclick={() => appController.handleLoadStreams(serverUrl)} disabled={loadStreamsLoading} aria-label="Refresh stream list">
           {loadStreamsLoading ? '...' : 'List'}
         </button>
-        <button onclick={() => status === 'CONNECTED' ? appController.handleDisconnect() : appController.handleConnect(serverUrl, selectedStream)}>
+        <button onclick={() => status === 'CONNECTED' ? appController.handleDisconnect() : appController.handleConnect(serverUrl, selectedStream)} aria-label={status === 'CONNECTED' ? 'Disconnect' : 'Connect'}>
           {status === 'CONNECTED' ? 'Disconnect' : 'Connect'}
         </button>
       </div>
@@ -181,41 +181,47 @@
     <div id="visual-settings-panel" class="hud-panel" class:hidden={!settingsVisible}>
       <div class="panel-header">
         <h3>Visual Settings</h3>
-        <button class="close-btn" onclick={() => settingsVisible = false}>
+        <button class="close-btn" onclick={() => settingsVisible = false} aria-label="Close settings">
           <span class="icon icon-close"></span>
         </button>
       </div>
       <div class="visual-controls">
         <div class="control-group">
-          <label for="theme-select">Theme</label>
-          <select id="theme-select" bind:value={theme} onchange={() => appController.handleShuffle()} aria-label="Select theme">
-            <option value="theme-neon">Neon (Default)</option>
-            <option value="theme-sunset">Sunset</option>
-            <option value="theme-forest">Forest</option>
-            <option value="theme-midnight">Midnight</option>
-          </select>
+          <label>
+            Theme
+            <select bind:value={theme} onchange={() => appController.handleShuffle()} aria-label="Select theme">
+              <option value="theme-neon">Neon (Default)</option>
+              <option value="theme-sunset">Sunset</option>
+              <option value="theme-forest">Forest</option>
+              <option value="theme-midnight">Midnight</option>
+            </select>
+          </label>
         </div>
         <div class="control-group">
-          <label for="preset-select">Preset</label>
-          <select id="preset-select" bind:value={currentPreset} onchange={() => viewImplementation.loadPreset(currentPreset)} aria-label="Select preset">
-            {#each presetNames as name}
-              <option value={name}>{name}</option>
-            {/each}
-          </select>
+          <label>
+            Preset
+            <select bind:value={currentPreset} onchange={() => viewImplementation.loadPreset(currentPreset)} aria-label="Select preset">
+              {#each presetNames as name}
+                <option value={name}>{name}</option>
+              {/each}
+            </select>
+          </label>
           <button onclick={() => viewImplementation.shuffle()}>Shuffle</button>
         </div>
         <div class="control-group">
-          <label for="scale-select">Render Scale</label>
-          <select id="scale-select" bind:value={renderScale}>
-            <option value={0.5}>0.5x</option>
-            <option value={1}>1.0x</option>
-            <option value={2.0}>2.0x</option>
-          </select>
+          <label>
+            Render Scale
+            <select bind:value={renderScale} aria-label="Select render scale">
+              <option value={0.5}>0.5x</option>
+              <option value={1}>1.0x</option>
+              <option value={2.0}>2.0x</option>
+            </select>
+          </label>
         </div>
         <div class="control-group">
-          <label for="aa-checkbox">Anti-Aliasing</label>
+          <span>Anti-Aliasing</span>
           <label class="switch">
-            <input type="checkbox" id="aa-checkbox" bind:checked={aaEnabled}>
+            <input type="checkbox" bind:checked={aaEnabled} aria-label="Toggle anti-aliasing" title="Toggle anti-aliasing">
             <span class="slider"></span>
           </label>
         </div>
@@ -241,19 +247,19 @@
 
       <div class="central-controls">
         <div class="playback-buttons">
-          <button class="icon-btn" class:active={shuffle} onclick={() => appController.handlePlaybackShuffle()} aria-label="Shuffle">
+          <button class="icon-btn" class:active={shuffle} onclick={() => appController.handlePlaybackShuffle()} aria-label="Shuffle" title="Shuffle">
             <span class="icon icon-shuffle"></span>
           </button>
-          <button class="icon-btn" onclick={() => appController.handleControl('previous')} aria-label="Previous">
+          <button class="icon-btn" onclick={() => appController.handleControl('previous')} aria-label="Previous" title="Previous">
             <span class="icon icon-prev"></span>
           </button>
-          <button class="icon-btn" onclick={() => appController.handleControl(playbackStatus === 'playing' ? 'pause' : 'play')} aria-label={playbackStatus === 'playing' ? 'Pause' : 'Play'}>
+          <button class="icon-btn" onclick={() => appController.handleControl(playbackStatus === 'playing' ? 'pause' : 'play')} aria-label={playbackStatus === 'playing' ? 'Pause' : 'Play'} title={playbackStatus === 'playing' ? 'Pause' : 'Play'}>
             <span class="icon {playbackStatus === 'playing' ? 'icon-pause' : 'icon-play'}"></span>
           </button>
-          <button class="icon-btn" onclick={() => appController.handleControl('next')} aria-label="Next">
+          <button class="icon-btn" onclick={() => appController.handleControl('next')} aria-label="Next" title="Next">
             <span class="icon icon-next"></span>
           </button>
-          <button class="icon-btn" class:active={loop !== 'none'} onclick={() => appController.handlePlaybackLoop()} aria-label="Loop mode">
+          <button class="icon-btn" class:active={loop !== 'none'} onclick={() => appController.handlePlaybackLoop()} aria-label="Loop mode" title="Loop mode">
             <span class="icon icon-loop-{loop}"></span>
           </button>
         </div>
