@@ -23,9 +23,9 @@ export default defineConfig({
 
 
     // UI components
-    ['glass-panel', 'bg-glass backdrop-blur-2xl border-1 border-white/12 rounded-3xl shadow-2xl transition-all duration-600'],
-    ['icon-btn', 'bg-white/5 w-12 h-12 flex items-center justify-center rounded-full border-1 border-white/10 text-white hover:(bg-white/15 scale-110 border-accent-secondary shadow-[0_0_15px_rgba(0,229,255,0.3)]) transition-all duration-200'],
-    ['icon-btn-active', 'text-accent-secondary border-accent-secondary bg-accent-secondary/10 shadow-[0_0_10px_rgba(0,229,255,0.2)]'],
+    ['glass-panel', 'bg-glass backdrop-blur-3xl border-1 border-white/8 rounded-3xl shadow-2xl transition-all duration-600'],
+    ['icon-btn', 'bg-white/5 w-12 h-12 flex items-center justify-center rounded-full border-1 border-white/8 text-white hover:(bg-accent-primary scale-110 border-transparent shadow-[0_0_20px_var(--accent-glow)]) transition-all duration-200'],
+    ['icon-btn-active', 'text-black border-transparent bg-accent-secondary shadow-[0_0_15px_rgba(6,182,212,0.4)]'],
   ],
   theme: {
     colors: {
@@ -33,7 +33,7 @@ export default defineConfig({
         primary: 'var(--accent-primary)',
         secondary: 'var(--accent-secondary)',
       },
-      glass: 'var(--panel-bg)',
+      glass: 'var(--glass-bg)',
     },
   },
   presets: [
