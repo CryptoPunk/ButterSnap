@@ -41,6 +41,16 @@
   let canSeek = $state(true);
   let streamVolume = $state(100);
   let streamMuted = $state(false);
+  let presetListVisible = $state(false);
+  let presetSearch = $state("");
+  let visShuffle = $state(true);
+  let shuffleInterval: any;
+
+  let filteredPresets = $derived(
+    presetNames.filter((name) =>
+      name.toLowerCase().includes(presetSearch.toLowerCase()),
+    ),
+  );
 
   let canvasElement: HTMLCanvasElement;
   let visualizer: any = null;
@@ -165,6 +175,29 @@
       const random = names[Math.floor(Math.random() * names.length)];
       this.loadPreset(random);
     },
+    toggleVisShuffle() {
+      visShuffle = !visShuffle;
+      if (visShuffle) {
+        this.startShuffleTimer();
+      } else {
+        this.stopShuffleTimer();
+      }
+    },
+    startShuffleTimer() {
+      this.stopShuffleTimer();
+      shuffleInterval = setInterval(() => {
+        if (visShuffle) this.shuffle();
+      }, 15000);
+    },
+    stopShuffleTimer() {
+      if (shuffleInterval) clearInterval(shuffleInterval);
+    },
+    nextPreset() {
+      if (presetNames.length === 0) return;
+      const currentIndex = presetNames.indexOf(currentPreset);
+      const nextIndex = (currentIndex + 1) % presetNames.length;
+      this.loadPreset(presetNames[nextIndex]);
+    },
   };
 
   let loopActive = false;
@@ -174,6 +207,8 @@
     presetNames = Object.keys(presets);
 
     appController = new AppController(viewImplementation);
+
+    if (visShuffle) viewImplementation.startShuffleTimer();
 
     const handleFS = () => {
       isFullscreen = !!document.fullscreenElement;
@@ -196,6 +231,7 @@
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("keydown", handleActivity);
       loopActive = false;
+      viewImplementation.stopShuffleTimer();
     };
   });
 
@@ -267,6 +303,28 @@
         </div>
       </div>
     </div>
+    <div class="vis-info-area">
+      <button class="vis-name-btn" onclick={() => (presetListVisible = true)}>
+        {currentPreset || "Select Visualization"}
+      </button>
+      <div class="vis-controls">
+        <button
+          class="icon-btn"
+          class:active={visShuffle}
+          onclick={() => viewImplementation.toggleVisShuffle()}
+          title="Toggle Shuffle"
+        >
+          <span class="icon-shuffle"></span>
+        </button>
+        <button
+          class="icon-btn"
+          onclick={() => viewImplementation.nextPreset()}
+          title="Next Visualization"
+        >
+          <span class="icon-next"></span>
+        </button>
+      </div>
+    </div>
 
     <div class="header-controls">
       <button class="icon-btn" onclick={toggleSettings} aria-label="Settings">
@@ -296,47 +354,39 @@
       </div>
       <div class="visual-controls">
         <div class="control-group">
-          <label>
-            Theme
-            <select
-              bind:value={theme}
-              onchange={() => appController.handleShuffle()}
-              aria-label="Select theme"
-            >
-              <option value="theme-neon">Neon (Default)</option>
-              <option value="theme-sunset">Sunset</option>
-              <option value="theme-forest">Forest</option>
-              <option value="theme-midnight">Midnight</option>
-            </select>
-          </label>
+          <div class="control-label">
+            <span class="icon-palette"></span>
+            <span>Theme</span>
+          </div>
+          <select
+            bind:value={theme}
+            onchange={() => appController.handleShuffle()}
+            aria-label="Select theme"
+          >
+            <option value="theme-neon">Neon (Default)</option>
+            <option value="theme-sunset">Sunset</option>
+            <option value="theme-forest">Forest</option>
+            <option value="theme-midnight">Midnight</option>
+          </select>
         </div>
+
         <div class="control-group">
-          <label>
-            Preset
-            <select
-              bind:value={currentPreset}
-              onchange={() => viewImplementation.loadPreset(currentPreset)}
-              aria-label="Select preset"
-            >
-              {#each presetNames as name}
-                <option value={name}>{name}</option>
-              {/each}
-            </select>
-          </label>
-          <button onclick={() => viewImplementation.shuffle()}>Shuffle</button>
+          <div class="control-label">
+            <span class="icon-scale"></span>
+            <span>Render Scale</span>
+          </div>
+          <select bind:value={renderScale} aria-label="Select render scale">
+            <option value={0.5}>0.5x</option>
+            <option value={1}>1.0x</option>
+            <option value={2.0}>2.0x</option>
+          </select>
         </div>
+
         <div class="control-group">
-          <label>
-            Render Scale
-            <select bind:value={renderScale} aria-label="Select render scale">
-              <option value={0.5}>0.5x</option>
-              <option value={1}>1.0x</option>
-              <option value={2.0}>2.0x</option>
-            </select>
-          </label>
-        </div>
-        <div class="control-group">
-          <span>Anti-Aliasing</span>
+          <div class="control-label">
+            <span class="icon-aa"></span>
+            <span>Anti-Aliasing</span>
+          </div>
           <label class="switch">
             <input
               type="checkbox"
@@ -347,24 +397,60 @@
             <span class="slider"></span>
           </label>
         </div>
-        <div class="control-group">
-          <button
-            id="fullscreen-btn"
-            onclick={toggleFullscreen}
-            class:active={isFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          >
-            <span
-              class:icon-windowed={isFullscreen}
-              class:icon-fullscreen={!isFullscreen}
-            ></span>
-            <span class="btn-text"
-              >{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span
-            >
-          </button>
-        </div>
       </div>
     </div>
+
+    {#if presetListVisible}
+      <div
+        class="modal-overlay"
+        onclick={() => (presetListVisible = false)}
+        onkeydown={(e) => e.key === "Escape" && (presetListVisible = false)}
+        role="presentation"
+      >
+        <div
+          class="modal-content"
+          onclick={(e) => e.stopPropagation()}
+          onkeydown={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          tabindex="-1"
+        >
+          <div class="modal-header">
+            <h3 id="modal-title">Select Visualization</h3>
+            <button
+              class="close-btn"
+              onclick={() => (presetListVisible = false)}
+              aria-label="Close visualization selector"
+            >
+              <span class="icon-close"></span>
+            </button>
+          </div>
+          <div class="search-box">
+            <span class="icon-search"></span>
+            <input
+              type="text"
+              bind:value={presetSearch}
+              placeholder="Search visualizations..."
+            />
+          </div>
+          <div class="preset-list">
+            {#each filteredPresets as name}
+              <button
+                class="preset-item"
+                class:active={name === currentPreset}
+                onclick={() => {
+                  viewImplementation.loadPreset(name);
+                  presetListVisible = false;
+                }}
+              >
+                {name}
+              </button>
+            {/each}
+          </div>
+        </div>
+      </div>
+    {/if}
 
     <div id="playback-hud" class="hud-panel">
       <div id="metadata-area" class:hidden={!metadata.title}>
@@ -434,6 +520,17 @@
               class:icon-loop-none={loop === "none"}
               class:icon-loop-track={loop === "track"}
               class:icon-loop-playlist={loop === "playlist"}
+            ></span>
+          </button>
+          <button
+            class="icon-btn"
+            onclick={toggleFullscreen}
+            class:active={isFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            <span
+              class:icon-windowed={isFullscreen}
+              class:icon-fullscreen={!isFullscreen}
             ></span>
           </button>
         </div>

@@ -42,4 +42,8 @@ export interface IAppView {
   resumeLoop(): void;
   loadPreset(name: string, blend?: number): void;
   shuffle(): void;
+  toggleVisShuffle(): void;
+  startShuffleTimer(): void;
+  stopShuffleTimer(): void;
+  nextPreset(): void;
 }
