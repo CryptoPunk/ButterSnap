@@ -10,23 +10,11 @@ import {
 export default defineConfig({
   content: {
     pipeline: {
-      include: ['./src/**/*.{html,js,ts,jsx,tsx}'],
+      include: ['./src/**/*.{html,js,ts,jsx,tsx,svelte}'],
     },
   },
   shortcuts: [
-    ['icon-play', 'i-ph:play-fill'],
-    ['icon-pause', 'i-ph:pause-fill'],
-    ['icon-shuffle', 'i-ph:shuffle-bold'],
-    ['icon-prev', 'i-ph:skip-back-fill'],
-    ['icon-next', 'i-ph:skip-forward-fill'],
-    ['icon-loop-none', 'i-ph:prohibit-bold'],
-    ['icon-loop-track', 'i-ph:repeat-once-bold'],
-    ['icon-loop-playlist', 'i-ph:repeat-bold'],
-    ['icon-gear', 'i-ph:gear-six-fill'],
-    ['icon-close', 'i-ph:x-bold'],
-    ['icon-fullscreen', 'i-ph:corners-out-bold'],
-    ['icon-windowed', 'i-ph:corners-in-bold'],
-    ['icon-volume', 'i-ph:speaker-high-fill'],
+
 
     // UI components
     ['glass-panel', 'bg-glass backdrop-blur-2xl border-1 border-white/12 rounded-3xl shadow-2xl transition-all duration-600'],

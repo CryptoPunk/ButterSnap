@@ -170,7 +170,7 @@
         </button>
       </div>
       <button class="icon-btn" onclick={toggleSettings} aria-label="Settings">
-        <span class="icon icon-gear"></span>
+        <span class="icon-gear"></span>
       </button>
     </div>
   </header>
@@ -182,7 +182,7 @@
       <div class="panel-header">
         <h3>Visual Settings</h3>
         <button class="close-btn" onclick={() => settingsVisible = false} aria-label="Close settings">
-          <span class="icon icon-close"></span>
+          <span class="icon-close"></span>
         </button>
       </div>
       <div class="visual-controls">
@@ -248,19 +248,25 @@
       <div class="central-controls">
         <div class="playback-buttons">
           <button class="icon-btn" class:active={shuffle} onclick={() => appController.handlePlaybackShuffle()} aria-label="Shuffle" title="Shuffle">
-            <span class="icon icon-shuffle"></span>
+            <span class="icon-shuffle"></span>
           </button>
           <button class="icon-btn" onclick={() => appController.handleControl('previous')} aria-label="Previous" title="Previous">
-            <span class="icon icon-prev"></span>
+            <span class="icon-prev"></span>
           </button>
           <button class="icon-btn" onclick={() => appController.handleControl(playbackStatus === 'playing' ? 'pause' : 'play')} aria-label={playbackStatus === 'playing' ? 'Pause' : 'Play'} title={playbackStatus === 'playing' ? 'Pause' : 'Play'}>
-            <span class="icon {playbackStatus === 'playing' ? 'icon-pause' : 'icon-play'}"></span>
+            <!-- icon-play and icon-pause must both be present statically for UnoCSS to extract them -->
+            <span class:icon-play={playbackStatus !== 'playing'} class:icon-pause={playbackStatus === 'playing'}></span>
           </button>
           <button class="icon-btn" onclick={() => appController.handleControl('next')} aria-label="Next" title="Next">
-            <span class="icon icon-next"></span>
+            <span class="icon-next"></span>
           </button>
           <button class="icon-btn" class:active={loop !== 'none'} onclick={() => appController.handlePlaybackLoop()} aria-label="Loop mode" title="Loop mode">
-            <span class="icon icon-loop-{loop}"></span>
+            <!-- All loop states must be present statically for UnoCSS -->
+            <span
+              class:icon-loop-none={loop === 'none'}
+              class:icon-loop-track={loop === 'track'}
+              class:icon-loop-playlist={loop === 'playlist'}
+            ></span>
           </button>
         </div>
         <div id="progress-container">
@@ -270,7 +276,7 @@
 
       <div class="audio-controls">
         <div class="control-row">
-          <span id="volume-icon"><span class="icon icon-volume"></span></span>
+          <span id="volume-icon"><span class="icon-volume"></span></span>
           <input type="range" bind:value={volume} min="0" max="100" oninput={() => appController.handleVolumeChange(volume)}>
         </div>
         <div class="selection-row">
