@@ -52,14 +52,23 @@
   let mediaBrowserVisible = $state(false);
   let leftPanelWidth = $state(280);
   let rightPanelWidth = $state(280);
-  let draggingPanel = $state<'left' | 'right' | null>(null);
+  let draggingPanel = $state<"left" | "right" | null>(null);
 
   function onDragMove(e: MouseEvent) {
     if (!draggingPanel) return;
-    if (draggingPanel === 'left') {
-      leftPanelWidth = Math.max(200, Math.min(e.clientX, document.body.clientWidth / 2));
+    if (draggingPanel === "left") {
+      leftPanelWidth = Math.max(
+        200,
+        Math.min(e.clientX, document.body.clientWidth / 2),
+      );
     } else {
-      rightPanelWidth = Math.max(200, Math.min(document.body.clientWidth - e.clientX, document.body.clientWidth / 2));
+      rightPanelWidth = Math.max(
+        200,
+        Math.min(
+          document.body.clientWidth - e.clientX,
+          document.body.clientWidth / 2,
+        ),
+      );
     }
   }
 
@@ -68,12 +77,12 @@
   }
 
   function startDragLeft(e: MouseEvent) {
-    draggingPanel = 'left';
+    draggingPanel = "left";
     e.preventDefault();
   }
 
   function startDragRight(e: MouseEvent) {
-    draggingPanel = 'right';
+    draggingPanel = "right";
     e.preventDefault();
   }
 
@@ -310,17 +319,30 @@
 
 <svelte:window onmousemove={onDragMove} onmouseup={stopDrag} />
 
-<div id="app-container" class:inactive={isInactive} class:dragging={!!draggingPanel} class={theme}>
+<div
+  id="app-container"
+  class:inactive={isInactive}
+  class:dragging={!!draggingPanel}
+  class={theme}
+>
   <div class="canvas-layer">
-    <canvas bind:this={canvasElement} width="1920" height="1080" id="canvas"></canvas>
+    <canvas bind:this={canvasElement} width="1920" height="1080" id="canvas"
+    ></canvas>
   </div>
-  
+
   <div class="workspace">
     {#if mediaBrowserVisible}
-      <div class="side-panel left-panel glass-panel" style="width: {leftPanelWidth}px">
+      <div
+        class="side-panel left-panel glass-panel"
+        style="width: {leftPanelWidth}px"
+      >
         <div class="panel-header">
           <h3>Media Browser</h3>
-          <button class="close-btn" onclick={() => mediaBrowserVisible = false} aria-label="Close media browser">
+          <button
+            class="close-btn"
+            onclick={() => (mediaBrowserVisible = false)}
+            aria-label="Close media browser"
+          >
             <span class="icon-close"></span>
           </button>
         </div>
@@ -331,361 +353,382 @@
         </div>
       </div>
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-      <div class="resizer resizer-left" onmousedown={startDragLeft} role="separator" aria-orientation="vertical" tabindex="-1"></div>
+      <div
+        class="resizer resizer-left"
+        onmousedown={startDragLeft}
+        role="separator"
+        aria-orientation="vertical"
+        tabindex="-1"
+      ></div>
     {/if}
 
     <main class="ui-central-column">
       <header>
-    <div class="logo-area">
-      <h1>ButterSnap</h1>
-      <div id="status-indicator" class={statusDotClass}>
-        <button
-          class="status-action-btn"
-          onclick={() => {
-            if (status === "CONNECTED") {
-              appController.handleDisconnect();
-            } else {
-              appController.handleLoadStreams(serverUrl);
-              appController.handleConnect(serverUrl, selectedStream);
-            }
-          }}
-          aria-label={status === "CONNECTED" ? "Disconnect" : "Connect"}
-          title={status}
-        >
-          <span
-            class:icon-connected={status === "CONNECTED"}
-            class:icon-disconnected={status !== "CONNECTED"}
-          ></span>
-        </button>
-        <div class="status-info-area">
-          {#if !isEditingUrl}
-            <span
-              class="status-label"
-              role="button"
-              tabindex="0"
-              onclick={() => (isEditingUrl = true)}
-              onkeydown={(e) => e.key === "Enter" && (isEditingUrl = true)}
-            >
-              {status}
-            </span>
+        <div class="logo-area">
+          <h1>ButterSnap</h1>
+          <div id="status-indicator" class={statusDotClass}>
             <button
-              class="edit-btn"
-              onclick={() => (isEditingUrl = true)}
-              aria-label="Edit URL"
-              title="Edit URL"
+              class="status-action-btn"
+              onclick={() => {
+                if (status === "CONNECTED") {
+                  appController.handleDisconnect();
+                } else {
+                  appController.handleLoadStreams(serverUrl);
+                  appController.handleConnect(serverUrl, selectedStream);
+                }
+              }}
+              aria-label={status === "CONNECTED" ? "Disconnect" : "Connect"}
+              title={status}
             >
-              <span class="icon-pencil"></span>
+              <span
+                class:icon-connected={status === "CONNECTED"}
+                class:icon-disconnected={status !== "CONNECTED"}
+              ></span>
             </button>
-          {:else}
-            <input
-              type="text"
-              bind:value={serverUrl}
-              placeholder="Snapserver URL"
-              onblur={() => (isEditingUrl = false)}
-              onkeydown={(e) => e.key === "Enter" && (isEditingUrl = false)}
-            />
-          {/if}
+            <div class="status-info-area">
+              {#if !isEditingUrl}
+                <span
+                  class="status-label"
+                  role="button"
+                  tabindex="0"
+                  onclick={() => (isEditingUrl = true)}
+                  onkeydown={(e) => e.key === "Enter" && (isEditingUrl = true)}
+                >
+                  {status}
+                </span>
+                <button
+                  class="edit-btn"
+                  onclick={() => (isEditingUrl = true)}
+                  aria-label="Edit URL"
+                  title="Edit URL"
+                >
+                  <span class="icon-pencil"></span>
+                </button>
+              {:else}
+                <input
+                  type="text"
+                  bind:value={serverUrl}
+                  placeholder="Snapserver URL"
+                  onblur={() => (isEditingUrl = false)}
+                  onkeydown={(e) => e.key === "Enter" && (isEditingUrl = false)}
+                />
+              {/if}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="vis-info-area">
-      <button class="vis-name-btn" onclick={() => (presetListVisible = true)}>
-        {currentPreset || "Select Visualization"}
-      </button>
-      <div class="vis-controls">
-        <button
-          class="icon-btn"
-          class:active={visShuffle}
-          onclick={() => viewImplementation.toggleVisShuffle()}
-          title="Toggle Shuffle"
-        >
-          <span class="icon-shuffle"></span>
-        </button>
-        <button
-          class="icon-btn"
-          onclick={() => viewImplementation.nextPreset()}
-          title="Next Visualization"
-        >
-          <span class="icon-next"></span>
-        </button>
-      </div>
-    </div>
+        <div class="vis-info-area">
+          <button
+            class="vis-name-btn"
+            onclick={() => (presetListVisible = true)}
+          >
+            {currentPreset || "Select Visualization"}
+          </button>
+          <div class="vis-controls">
+            <button
+              class="icon-btn"
+              class:active={visShuffle}
+              onclick={() => viewImplementation.toggleVisShuffle()}
+              title="Toggle Shuffle"
+            >
+              <span class="icon-shuffle"></span>
+            </button>
+            <button
+              class="icon-btn"
+              onclick={() => viewImplementation.nextPreset()}
+              title="Next Visualization"
+            >
+              <span class="icon-next"></span>
+            </button>
+          </div>
+        </div>
 
-    <div class="header-controls">
-      <button class="icon-btn" onclick={() => mediaBrowserVisible = !mediaBrowserVisible} aria-label="Media Browser">
-        <span class="icon-folder"></span>
-      </button>
-      <button class="icon-btn" onclick={toggleSettings} aria-label="Settings">
-        <span class="icon-gear"></span>
-      </button>
-    </div>
+        <div class="header-controls">
+          <button
+            class="icon-btn"
+            onclick={() => (mediaBrowserVisible = !mediaBrowserVisible)}
+            aria-label="Media Browser"
+          >
+            <span class="icon-folder"></span>
+          </button>
+          <button
+            class="icon-btn"
+            onclick={toggleSettings}
+            aria-label="Settings"
+          >
+            <span class="icon-gear"></span>
+          </button>
+        </div>
       </header>
 
       <div class="ui-spacer" style="flex: 1"></div>
 
-
-
-    {#if presetListVisible}
-      <div
-        class="modal-overlay"
-        onclick={() => (presetListVisible = false)}
-        onkeydown={(e) => e.key === "Escape" && (presetListVisible = false)}
-        role="presentation"
-      >
+      {#if presetListVisible}
         <div
-          class="modal-content"
-          onclick={(e) => e.stopPropagation()}
-          onkeydown={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-          tabindex="-1"
+          class="modal-overlay"
+          onclick={() => (presetListVisible = false)}
+          onkeydown={(e) => e.key === "Escape" && (presetListVisible = false)}
+          role="presentation"
         >
-          <div class="modal-header">
-            <h3 id="modal-title">Select Visualization</h3>
+          <div
+            class="modal-content"
+            onclick={(e) => e.stopPropagation()}
+            onkeydown={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            tabindex="-1"
+          >
+            <div class="modal-header">
+              <h3 id="modal-title">Select Visualization</h3>
+              <button
+                class="close-btn"
+                onclick={() => (presetListVisible = false)}
+                aria-label="Close visualization selector"
+              >
+                <span class="icon-close"></span>
+              </button>
+            </div>
+            <div class="search-box">
+              <span class="icon-search"></span>
+              <input
+                type="text"
+                bind:value={presetSearch}
+                placeholder="Search visualizations..."
+              />
+            </div>
+            <div class="preset-list">
+              {#each filteredPresets as name}
+                <button
+                  class="preset-item"
+                  class:active={name === currentPreset}
+                  onclick={() => {
+                    viewImplementation.loadPreset(name);
+                    presetListVisible = false;
+                  }}
+                >
+                  {name}
+                </button>
+              {/each}
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <div id="playback-hud" class="hud-panel">
+        <div id="metadata-area" class:hidden={!metadata.title}>
+          {#if metadata.art}
+            <img id="album-art" src={metadata.art} alt="Album Art" />
+          {:else}
+            <div id="album-art" class="empty-art">
+              <span class="icon-music"></span>
+            </div>
+          {/if}
+          <div class="track-info">
+            <h2>{metadata.title}</h2>
+            <p>{metadata.artist}</p>
+          </div>
+        </div>
+
+        <div class="central-controls">
+          <div class="playback-buttons">
             <button
-              class="close-btn"
-              onclick={() => (presetListVisible = false)}
-              aria-label="Close visualization selector"
+              class="icon-btn"
+              class:active={shuffle}
+              onclick={() => appController.handlePlaybackShuffle()}
+              aria-label="Shuffle"
+              title="Shuffle"
             >
-              <span class="icon-close"></span>
+              <span class="icon-shuffle"></span>
+            </button>
+            <button
+              class="icon-btn"
+              onclick={() => appController.handleControl("previous")}
+              disabled={!canGoPrevious}
+              aria-label="Previous"
+              title="Previous"
+            >
+              <span class="icon-prev"></span>
+            </button>
+            <button
+              class="icon-btn"
+              onclick={() =>
+                appController.handleControl(
+                  playbackStatus === "playing" ? "pause" : "play",
+                )}
+              disabled={playbackStatus === "playing" ? !canPause : !canPlay}
+              aria-label={playbackStatus === "playing" ? "Pause" : "Play"}
+              title={playbackStatus === "playing" ? "Pause" : "Play"}
+            >
+              <!-- icon-play and icon-pause must both be present statically for UnoCSS to extract them -->
+              <span
+                class:icon-play={playbackStatus !== "playing"}
+                class:icon-pause={playbackStatus === "playing"}
+              ></span>
+            </button>
+            <button
+              class="icon-btn"
+              onclick={() => appController.handleControl("next")}
+              disabled={!canGoNext}
+              aria-label="Next"
+              title="Next"
+            >
+              <span class="icon-next"></span>
+            </button>
+            <button
+              class="icon-btn"
+              class:active={loop !== "none"}
+              onclick={() => appController.handlePlaybackLoop()}
+              aria-label="Loop mode"
+              title="Loop mode"
+            >
+              <!-- All loop states must be present statically for UnoCSS -->
+              <span
+                class:icon-loop-none={loop === "none"}
+                class:icon-loop-track={loop === "track"}
+                class:icon-loop-playlist={loop === "playlist"}
+              ></span>
             </button>
           </div>
-          <div class="search-box">
-            <span class="icon-search"></span>
-            <input
-              type="text"
-              bind:value={presetSearch}
-              placeholder="Search visualizations..."
-            />
+          <div id="progress-container">
+            <div id="progress-bar" style="width: {progressPercent}%"></div>
           </div>
-          <div class="preset-list">
-            {#each filteredPresets as name}
-              <button
-                class="preset-item"
-                class:active={name === currentPreset}
-                onclick={() => {
-                  viewImplementation.loadPreset(name);
-                  presetListVisible = false;
-                }}
-              >
-                {name}
-              </button>
-            {/each}
+        </div>
+
+        <div class="audio-controls">
+          <div class="control-row">
+            <span id="volume-icon"><span class="icon-volume"></span></span>
+            <input
+              type="range"
+              bind:value={volume}
+              min="0"
+              max="100"
+              oninput={() => appController.handleVolumeChange(volume)}
+            />
+            <button
+              class="icon-btn"
+              onclick={toggleFullscreen}
+              class:active={isFullscreen}
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              <span
+                class:icon-windowed={isFullscreen}
+                class:icon-fullscreen={!isFullscreen}
+              ></span>
+            </button>
+          </div>
+          <div class="selection-row">
+            <select
+              bind:value={selectedStream}
+              title="Source Stream"
+              onfocus={() => appController.handleLoadStreams(serverUrl)}
+            >
+              <option value="">Default Stream</option>
+              {#each streams as stream}
+                <option value={stream.id}>{stream.name}</option>
+              {/each}
+            </select>
+            <select
+              bind:value={selectedClient}
+              title="Playback Device"
+              onchange={() => appController.handleClientChange(selectedClient)}
+            >
+              <option value="">This Browser</option>
+              {#each clients as client}
+                <option value={client.id}>{client.name}</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    {#if settingsVisible}
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+      <div
+        class="resizer resizer-right"
+        onmousedown={startDragRight}
+        role="separator"
+        aria-orientation="vertical"
+        tabindex="-1"
+      ></div>
+      <div
+        id="visual-settings-panel"
+        class="side-panel right-panel glass-panel"
+        style="width: {rightPanelWidth}px"
+      >
+        <div class="panel-header">
+          <h3>Settings</h3>
+          <button
+            class="close-btn"
+            onclick={() => (settingsVisible = false)}
+            aria-label="Close settings"
+          >
+            <span class="icon-close"></span>
+          </button>
+        </div>
+        <div class="visual-controls panel-content">
+          <div class="control-group">
+            <div class="control-label">
+              <span class="icon-palette"></span>
+              <span>Theme</span>
+            </div>
+            <select
+              bind:value={theme}
+              onchange={() => appController.handleShuffle()}
+              aria-label="Select theme"
+            >
+              <option value="theme-neon">Neon (Default)</option>
+              <option value="theme-sunset">Sunset</option>
+              <option value="theme-forest">Forest</option>
+              <option value="theme-midnight">Midnight</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label">
+              <span class="icon-scale"></span>
+              <span>Render Scale</span>
+            </div>
+            <select bind:value={renderScale} aria-label="Select render scale">
+              <option value={0.5}>0.5x</option>
+              <option value={1}>1.0x</option>
+              <option value={2.0}>2.0x</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label">
+              <span class="icon-aa"></span>
+              <span>Anti-Aliasing</span>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                bind:checked={aaEnabled}
+                aria-label="Toggle anti-aliasing"
+                title="Toggle anti-aliasing"
+              />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label">
+              <span class="icon-play"></span>
+              <span>OS Media Sync</span>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                bind:checked={mediaSessionEnabled}
+                aria-label="Toggle OS media sync"
+                title="Toggle OS media sync"
+              />
+              <span class="slider"></span>
+            </label>
           </div>
         </div>
       </div>
     {/if}
-
-    <div id="playback-hud" class="hud-panel">
-      <div id="metadata-area" class:hidden={!metadata.title}>
-        {#if metadata.art}
-          <img id="album-art" src={metadata.art} alt="Album Art" />
-        {:else}
-          <div id="album-art" class="empty-art">
-            <span class="icon-music"></span>
-          </div>
-        {/if}
-        <div class="track-info">
-          <h2>{metadata.title}</h2>
-          <p>{metadata.artist}</p>
-        </div>
-      </div>
-
-      <div class="central-controls">
-        <div class="playback-buttons">
-          <button
-            class="icon-btn"
-            class:active={shuffle}
-            onclick={() => appController.handlePlaybackShuffle()}
-            aria-label="Shuffle"
-            title="Shuffle"
-          >
-            <span class="icon-shuffle"></span>
-          </button>
-          <button
-            class="icon-btn"
-            onclick={() => appController.handleControl("previous")}
-            disabled={!canGoPrevious}
-            aria-label="Previous"
-            title="Previous"
-          >
-            <span class="icon-prev"></span>
-          </button>
-          <button
-            class="icon-btn"
-            onclick={() =>
-              appController.handleControl(
-                playbackStatus === "playing" ? "pause" : "play",
-              )}
-            disabled={playbackStatus === "playing" ? !canPause : !canPlay}
-            aria-label={playbackStatus === "playing" ? "Pause" : "Play"}
-            title={playbackStatus === "playing" ? "Pause" : "Play"}
-          >
-            <!-- icon-play and icon-pause must both be present statically for UnoCSS to extract them -->
-            <span
-              class:icon-play={playbackStatus !== "playing"}
-              class:icon-pause={playbackStatus === "playing"}
-            ></span>
-          </button>
-          <button
-            class="icon-btn"
-            onclick={() => appController.handleControl("next")}
-            disabled={!canGoNext}
-            aria-label="Next"
-            title="Next"
-          >
-            <span class="icon-next"></span>
-          </button>
-          <button
-            class="icon-btn"
-            class:active={loop !== "none"}
-            onclick={() => appController.handlePlaybackLoop()}
-            aria-label="Loop mode"
-            title="Loop mode"
-          >
-            <!-- All loop states must be present statically for UnoCSS -->
-            <span
-              class:icon-loop-none={loop === "none"}
-              class:icon-loop-track={loop === "track"}
-              class:icon-loop-playlist={loop === "playlist"}
-            ></span>
-          </button>
-        </div>
-        <div id="progress-container">
-          <div id="progress-bar" style="width: {progressPercent}%"></div>
-        </div>
-      </div>
-
-      <div class="audio-controls">
-        <div class="control-row">
-          <span id="volume-icon"><span class="icon-volume"></span></span>
-          <input
-            type="range"
-            bind:value={volume}
-            min="0"
-            max="100"
-            oninput={() => appController.handleVolumeChange(volume)}
-          />
-          <button
-            class="icon-btn"
-            onclick={toggleFullscreen}
-            class:active={isFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          >
-            <span
-              class:icon-windowed={isFullscreen}
-              class:icon-fullscreen={!isFullscreen}
-            ></span>
-          </button>
-        </div>
-        <div class="selection-row">
-          <select
-            bind:value={selectedStream}
-            title="Source Stream"
-            onfocus={() => appController.handleLoadStreams(serverUrl)}
-          >
-            <option value="">Default Stream</option>
-            {#each streams as stream}
-              <option value={stream.id}>{stream.name}</option>
-            {/each}
-          </select>
-          <select
-            bind:value={selectedClient}
-            title="Playback Device"
-            onchange={() => appController.handleClientChange(selectedClient)}
-          >
-            <option value="">This Browser</option>
-            {#each clients as client}
-              <option value={client.id}>{client.name}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  {#if settingsVisible}
-    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-    <div class="resizer resizer-right" onmousedown={startDragRight} role="separator" aria-orientation="vertical" tabindex="-1"></div>
-    <div
-      id="visual-settings-panel"
-      class="side-panel right-panel glass-panel"
-      style="width: {rightPanelWidth}px"
-    >
-      <div class="panel-header">
-        <h3>Settings</h3>
-        <button
-          class="close-btn"
-          onclick={() => (settingsVisible = false)}
-          aria-label="Close settings"
-        >
-          <span class="icon-close"></span>
-        </button>
-      </div>
-      <div class="visual-controls panel-content">
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-palette"></span>
-            <span>Theme</span>
-          </div>
-          <select
-            bind:value={theme}
-            onchange={() => appController.handleShuffle()}
-            aria-label="Select theme"
-          >
-            <option value="theme-neon">Neon (Default)</option>
-            <option value="theme-sunset">Sunset</option>
-            <option value="theme-forest">Forest</option>
-            <option value="theme-midnight">Midnight</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-scale"></span>
-            <span>Render Scale</span>
-          </div>
-          <select bind:value={renderScale} aria-label="Select render scale">
-            <option value={0.5}>0.5x</option>
-            <option value={1}>1.0x</option>
-            <option value={2.0}>2.0x</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-aa"></span>
-            <span>Anti-Aliasing</span>
-          </div>
-          <label class="switch">
-            <input
-              type="checkbox"
-              bind:checked={aaEnabled}
-              aria-label="Toggle anti-aliasing"
-              title="Toggle anti-aliasing"
-            />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-play"></span>
-            <span>OS Media Sync</span>
-          </div>
-          <label class="switch">
-            <input
-              type="checkbox"
-              bind:checked={mediaSessionEnabled}
-              aria-label="Toggle OS media sync"
-              title="Toggle OS media sync"
-            />
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-  {/if}
   </div>
 </div>
