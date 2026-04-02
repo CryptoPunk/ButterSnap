@@ -116,11 +116,22 @@ export class SnapClient extends EventTarget {
           })();
         } else if (this.codec === 'opus') {
           const dec = new OpusMLDecoder();
-          this.decoder = dec;
+          // Wrap OpusMLDecoder instance to match Promise-based decode(...) interface
+          this.decoder = {
+            ready: dec.ready,
+            free: () => dec.free(),
+            decode: async (data: Uint8Array) => dec.decodeFrame(data),
+          };
           this.decoderReady = (async () => {
             await dec.ready;
             if (codecMsg.payload.byteLength > 0) {
-              await dec.decode(new Uint8Array(codecMsg.payload));
+              // Snapcast sends metadata in the payload, but for raw Opus it may not be valid frames.
+              // We attempt decoding to account for any initial sync frames if present.
+              try {
+                await this.decoder.decode(new Uint8Array(codecMsg.payload));
+              } catch (e) {
+                console.warn('Opus initial header decode failed (expected for raw opus):', e);
+              }
             }
           })();
         } else if (this.codec === 'ogg' || this.codec === 'vorbis') {

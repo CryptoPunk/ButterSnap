@@ -13,7 +13,7 @@ mock.module("@wasm-audio-decoders/flac", () => ({
 mock.module("@wasm-audio-decoders/opus-ml", () => ({
   OpusMLDecoder: class {
     ready = Promise.resolve();
-    decode = mock((data: any) => ({ channelData: [new Float32Array(20), new Float32Array(20)], samplesDecoded: 20 }));
+    decodeFrame = mock((data: any) => ({ channelData: [new Float32Array(20), new Float32Array(20)], samplesDecoded: 20 }));
     free = mock(() => {});
   }
 }));
