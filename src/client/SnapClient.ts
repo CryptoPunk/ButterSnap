@@ -137,7 +137,7 @@ export class SnapClient extends EventTarget {
         if (this.decoder) {
           try {
             const decoded = await this.decoder.decode(new Uint8Array(pcm.payload));
-            if (decoded && decoded.channelData) {
+            if (decoded && decoded.channelData && decoded.channelData.length > 0 && decoded.samplesDecoded > 0) {
               // Emit decoded audio data
               this.dispatchEvent(new CustomEvent('audio', { detail: { 
                 timestamp: pcm.timestamp, 

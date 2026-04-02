@@ -344,6 +344,8 @@ export class AppController {
       // Data is already decoded (e.g. from FLAC/Opus WASM)
       const channels = data.channelData.length;
       const samples = data.samples;
+      if (channels === 0 || samples === 0) return;
+
       buffer = this.audioContext.createBuffer(channels, samples, this.sampleFormat.rate);
       for (let i = 0; i < channels; i++) {
         buffer.getChannelData(i).set(data.channelData[i]);
