@@ -311,67 +311,6 @@ h1::first-letter {
   @apply icon-btn-active;
 }
 
-/* Icon Decoupling with UnoCSS */
-#play-pause-btn .icon {
-  display: block;
-  width: 1.8rem;
-  height: 1.8rem;
-  @apply icon-play;
-}
-
-#play-pause-btn.playing .icon {
-  @apply icon-pause;
-}
-
-#playback-loop-btn .icon {
-  display: block;
-  width: 1.4rem;
-  height: 1.4rem;
-  @apply icon-loop-playlist;
-}
-
-#playback-loop-btn.loop-track .icon {
-  @apply icon-loop-track;
-}
-
-#playback-loop-btn.loop-none .icon {
-  @apply icon-loop-none;
-}
-
-#playback-shuffle-btn .icon {
-  @apply icon-shuffle;
-}
-
-#prev-btn .icon {
-  @apply icon-prev;
-}
-
-#next-btn .icon {
-  @apply icon-next;
-}
-
-#fullscreen-btn .icon {
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 0.5rem;
-  @apply icon-windowed;
-}
-
-#fullscreen-btn.fullscreen .icon {
-  @apply icon-fullscreen;
-}
-
-#volume-icon .icon {
-  @apply icon-volume;
-}
-
-#visual-settings-btn .icon {
-  @apply icon-gear;
-}
-
-#close-settings-btn .icon {
-  @apply icon-close;
-}
 
 
 #play-pause-btn:hover {
