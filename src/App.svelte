@@ -247,7 +247,7 @@
 
       <div class="central-controls">
         <div class="playback-buttons">
-          <button class="icon-btn" class:active={shuffle} onclick={() => appController.handlePlaybackShuffle()} aria-label="Shuffle" title="Shuffle">
+          <button class="icon-btn" class:icon-btn-active={shuffle} onclick={() => appController.handlePlaybackShuffle()} aria-label="Shuffle" title="Shuffle">
             <span class="icon-shuffle"></span>
           </button>
           <button class="icon-btn" onclick={() => appController.handleControl('previous')} aria-label="Previous" title="Previous">
@@ -260,7 +260,7 @@
           <button class="icon-btn" onclick={() => appController.handleControl('next')} aria-label="Next" title="Next">
             <span class="icon-next"></span>
           </button>
-          <button class="icon-btn" class:active={loop !== 'none'} onclick={() => appController.handlePlaybackLoop()} aria-label="Loop mode" title="Loop mode">
+          <button class="icon-btn" class:icon-btn-active={loop !== 'none'} onclick={() => appController.handlePlaybackLoop()} aria-label="Loop mode" title="Loop mode">
             <!-- All loop states must be present statically for UnoCSS -->
             <span
               class:icon-loop-none={loop === 'none'}
