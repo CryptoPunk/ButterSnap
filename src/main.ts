@@ -1,5 +1,6 @@
 import { mount } from 'svelte';
 import App from './App.svelte';
+import '@fontsource/outfit';
 import './style.css';
 import 'virtual:uno.css';
 
