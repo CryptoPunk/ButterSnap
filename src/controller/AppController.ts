@@ -1,10 +1,10 @@
 import { SnapClient } from '../client/SnapClient';
 import { SnapControlClient } from '../client/SnapControlClient';
-import { AppView } from '../view/AppView';
+import { IAppView, ViewEvents } from '../view/AppView';
 import { PcmChunkMessage, SampleFormat } from '../protocol/SnapMessage';
 
 export class AppController {
-  private view: AppView;
+  private view: IAppView;
   public client: SnapClient | null = null;
   public controlClient: SnapControlClient | null = null;
   private audioContext: AudioContext | null = null;
@@ -17,31 +17,8 @@ export class AppController {
   private playbackShuffle = false;
   private playbackLoop: 'none' | 'track' | 'playlist' = 'none';
 
-  constructor() {
-    this.view = new AppView({
-      onConnect: (url, streamId) => this.handleConnect(url, streamId),
-      onDisconnect: () => this.handleDisconnect(),
-      onLoadStreams: (url) => this.handleLoadStreams(url),
-      onPresetChange: (name) => {
-        this.view.loadPreset(name);
-        this.saveSettings();
-      },
-      onShuffle: () => this.handleShuffle(),
-      onScaleChange: (scale) => this.saveSettings(),
-      onAaToggle: (enabled) => {
-        this.view.setAA(enabled);
-        this.saveSettings();
-      },
-      onPrev: () => this.handleControl('previous'),
-      onNext: () => this.handleControl('next'),
-      onTogglePlay: () => this.handleControl(this.playbackStatus === 'playing' ? 'pause' : 'play'),
-      onToggleShuffle: () => this.handlePlaybackShuffle(),
-      onToggleLoop: () => this.handlePlaybackLoop(),
-      onVolumeChange: (volume) => this.handleVolumeChange(volume),
-      onClientChange: (clientId) => this.handleClientChange(clientId),
-      onThemeChange: (theme) => this.saveSettings(),
-    });
-
+  constructor(view: IAppView) {
+    this.view = view;
     this.loadSettings();
     this.initMediaSession();
   }
@@ -73,7 +50,7 @@ export class AppController {
     localStorage.setItem('buttersync-settings', JSON.stringify(settings));
   }
 
-  private async handleConnect(url: string, streamId?: string) {
+  public async handleConnect(url: string, streamId?: string) {
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.analyzer = this.audioContext.createAnalyser();
@@ -109,7 +86,7 @@ export class AppController {
     this.handleLoadStreams(url);
   }
 
-  private handleDisconnect() {
+  public handleDisconnect() {
     if (this.client) {
       this.client.disconnect();
       this.client = null;
@@ -117,7 +94,7 @@ export class AppController {
     }
   }
 
-  private async handleLoadStreams(url: string) {
+  public async handleLoadStreams(url: string) {
     if (!url) return;
     try {
       this.view.setLoadStreamsLoading(true);
@@ -190,7 +167,7 @@ export class AppController {
     }
   }
 
-  private async handleControl(command: 'play' | 'pause' | 'next' | 'previous') {
+  public async handleControl(command: 'play' | 'pause' | 'next' | 'previous') {
     if (this.controlClient && this.currentStreamId) {
       try {
         await this.controlClient.controlStream(this.currentStreamId, command);
@@ -200,7 +177,7 @@ export class AppController {
     }
   }
 
-  private async handlePlaybackShuffle() {
+  public async handlePlaybackShuffle() {
     if (this.controlClient && this.currentStreamId) {
       try {
         const nextShuffle = !this.playbackShuffle;
@@ -211,7 +188,7 @@ export class AppController {
     }
   }
 
-  private async handlePlaybackLoop() {
+  public async handlePlaybackLoop() {
     if (this.controlClient && this.currentStreamId) {
       try {
         const loopModes: Array<'none' | 'track' | 'playlist'> = ['none', 'track', 'playlist'];
@@ -224,7 +201,7 @@ export class AppController {
     }
   }
 
-  private async handleVolumeChange(volume: number) {
+  public async handleVolumeChange(volume: number) {
     if (this.controlClient) {
       // If we have a current client ID, set its volume. 
       // For now, let's assume we are controlling 'this browser' client if we can identify it, 
@@ -237,7 +214,7 @@ export class AppController {
     }
   }
 
-  private async handleClientChange(clientId: string) {
+  public async handleClientChange(clientId: string) {
     // Logic to focus on a different client's volume or state if needed
     console.log('Selected client:', clientId);
   }
@@ -352,7 +329,7 @@ export class AppController {
     }
   }
 
-  private handleShuffle() {
+  public handleShuffle() {
     this.view.shuffle();
     this.saveSettings();
   }

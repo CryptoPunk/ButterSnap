@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import UnoCSS from 'unocss/vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
+    svelte(),
     UnoCSS(),
     dts({
       insertTypesEntry: true,

@@ -1,10 +1,9 @@
-import { AppController } from './controller/AppController';
+import { mount } from 'svelte';
+import App from './App.svelte';
 import './style.css';
 import 'virtual:uno.css';
 
-// Initialize the application controller
-const app = new AppController();
-if (import.meta.env.DEV) {
-  (window as any).app = app;
-}
+// Initialize the Svelte application
+const app = mount(App, { target: document.getElementById('app')! });
 
+export default app;
