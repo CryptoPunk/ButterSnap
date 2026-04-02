@@ -57,6 +57,12 @@
   let presets: any = null;
   let appController: AppController;
 
+  $effect(() => {
+    if (status !== "CONNECTED") {
+      isInactive = false;
+    }
+  });
+
   const viewImplementation: IAppView = {
     updateStatus(state) {
       status = state;
@@ -220,11 +226,14 @@
       isInactive = false;
       clearTimeout(activityTimer);
       activityTimer = setTimeout(() => {
-        if (isFullscreen) isInactive = true;
+        if (!settingsVisible && !presetListVisible && status === "CONNECTED") {
+          isInactive = true;
+        }
       }, 3000);
     };
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("keydown", handleActivity);
+    handleActivity(); // Start initial timer
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFS);
