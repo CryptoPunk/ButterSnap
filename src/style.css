@@ -675,16 +675,16 @@ body.inactive {
   height: 1em;
 }
 
-.icon-play { @apply i-ph:play-fill; }
-.icon-pause { @apply i-ph:pause-fill; }
-.icon-shuffle { @apply i-ph:shuffle-bold; }
-.icon-prev { @apply i-ph:skip-back-fill; }
-.icon-next { @apply i-ph:skip-forward-fill; }
-.icon-loop-none { @apply i-ph:prohibit-bold; }
-.icon-loop-track { @apply i-ph:repeat-once-bold; }
-.icon-loop-playlist { @apply i-ph:repeat-bold; }
-.icon-gear { @apply i-ph:gear-six-fill; }
-.icon-close { @apply i-ph:x-bold; }
-.icon-fullscreen { @apply i-ph:corners-out-bold; }
-.icon-windowed { @apply i-ph:corners-in-bold; }
-.icon-volume { @apply i-ph:speaker-high-fill; }
+.icon-play { @apply i-ph:play-fill; width: 28px; height: 28px; }
+.icon-pause { @apply i-ph:pause-fill; width: 28px; height: 28px; }
+.icon-shuffle { @apply i-ph:shuffle-bold; width: 28px; height: 28px; }
+.icon-prev { @apply i-ph:skip-back-fill; width: 28px; height: 28px; }
+.icon-next { @apply i-ph:skip-forward-fill; width: 28px; height: 28px; }
+.icon-loop-none { @apply i-ph:prohibit-bold; width: 28px; height: 28px; }
+.icon-loop-track { @apply i-ph:repeat-once-bold; width: 28px; height: 28px; }
+.icon-loop-playlist { @apply i-ph:repeat-bold; width: 28px; height: 28px; }
+.icon-gear { @apply i-ph:gear-six-fill; width: 28px; height: 28px; }
+.icon-close { @apply i-ph:x-bold; width: 24px; height: 24px; }
+.icon-fullscreen { @apply i-ph:corners-out-bold; width: 28px; height: 28px; }
+.icon-windowed { @apply i-ph:corners-in-bold; width: 28px; height: 28px; }
+.icon-volume { @apply i-ph:speaker-high-fill; width: 24px; height: 24px; }
