@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "dev:stack": "concurrently \"bun run dev\" \"bun run serve:snap\"",
+    "dev:stack": "concurrently \"vite --host\" \"bun run serve:snap\"",
     "build": "vite build && bun x publint",
     "lint": "tsc --noEmit",
     "check": "publint",

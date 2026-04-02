@@ -48,6 +48,35 @@
   let visShuffle = $state(true);
   let shuffleInterval: any;
 
+  // Additional Panel State
+  let mediaBrowserVisible = $state(false);
+  let leftPanelWidth = $state(280);
+  let rightPanelWidth = $state(280);
+  let draggingPanel = $state<'left' | 'right' | null>(null);
+
+  function onDragMove(e: MouseEvent) {
+    if (!draggingPanel) return;
+    if (draggingPanel === 'left') {
+      leftPanelWidth = Math.max(200, Math.min(e.clientX, document.body.clientWidth / 2));
+    } else {
+      rightPanelWidth = Math.max(200, Math.min(document.body.clientWidth - e.clientX, document.body.clientWidth / 2));
+    }
+  }
+
+  function stopDrag() {
+    draggingPanel = null;
+  }
+
+  function startDragLeft(e: MouseEvent) {
+    draggingPanel = 'left';
+    e.preventDefault();
+  }
+
+  function startDragRight(e: MouseEvent) {
+    draggingPanel = 'right';
+    e.preventDefault();
+  }
+
   let filteredPresets = $derived(
     presetNames.filter((name) =>
       name.toLowerCase().includes(presetSearch.toLowerCase()),
@@ -279,8 +308,33 @@
   }
 </script>
 
-<div id="app-container" class:inactive={isInactive} class={theme}>
-  <header>
+<svelte:window onmousemove={onDragMove} onmouseup={stopDrag} />
+
+<div id="app-container" class:inactive={isInactive} class:dragging={!!draggingPanel} class={theme}>
+  <div class="canvas-layer">
+    <canvas bind:this={canvasElement} width="1920" height="1080" id="canvas"></canvas>
+  </div>
+  
+  <div class="workspace">
+    {#if mediaBrowserVisible}
+      <div class="side-panel left-panel glass-panel" style="width: {leftPanelWidth}px">
+        <div class="panel-header">
+          <h3>Media Browser</h3>
+          <button class="close-btn" onclick={() => mediaBrowserVisible = false} aria-label="Close media browser">
+            <span class="icon-close"></span>
+          </button>
+        </div>
+        <div class="panel-content empty-state">
+          <div class="empty-icon"><span class="icon-folder"></span></div>
+          <p>Media Library</p>
+          <small>Coming Soon...</small>
+        </div>
+      </div>
+      <div class="resizer resizer-left" onmousedown={startDragLeft} role="separator" aria-orientation="vertical" tabindex="-1"></div>
+    {/if}
+
+    <main class="ui-central-column">
+      <header>
     <div class="logo-area">
       <h1>ButterSync</h1>
       <div id="status-indicator" class={statusDotClass}>
@@ -357,94 +411,18 @@
     </div>
 
     <div class="header-controls">
+      <button class="icon-btn" onclick={() => mediaBrowserVisible = !mediaBrowserVisible} aria-label="Media Browser">
+        <span class="icon-folder"></span>
+      </button>
       <button class="icon-btn" onclick={toggleSettings} aria-label="Settings">
         <span class="icon-gear"></span>
       </button>
     </div>
-  </header>
+      </header>
 
-  <main>
-    <canvas bind:this={canvasElement} width="1920" height="1080" id="canvas"
-    ></canvas>
+      <div class="ui-spacer" style="flex: 1"></div>
 
-    <div
-      id="visual-settings-panel"
-      class="hud-panel"
-      class:hidden={!settingsVisible}
-    >
-      <div class="panel-header">
-        <h3>Visual Settings</h3>
-        <button
-          class="close-btn"
-          onclick={() => (settingsVisible = false)}
-          aria-label="Close settings"
-        >
-          <span class="icon-close"></span>
-        </button>
-      </div>
-      <div class="visual-controls">
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-palette"></span>
-            <span>Theme</span>
-          </div>
-          <select
-            bind:value={theme}
-            onchange={() => appController.handleShuffle()}
-            aria-label="Select theme"
-          >
-            <option value="theme-neon">Neon (Default)</option>
-            <option value="theme-sunset">Sunset</option>
-            <option value="theme-forest">Forest</option>
-            <option value="theme-midnight">Midnight</option>
-          </select>
-        </div>
 
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-scale"></span>
-            <span>Render Scale</span>
-          </div>
-          <select bind:value={renderScale} aria-label="Select render scale">
-            <option value={0.5}>0.5x</option>
-            <option value={1}>1.0x</option>
-            <option value={2.0}>2.0x</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-aa"></span>
-            <span>Anti-Aliasing</span>
-          </div>
-          <label class="switch">
-            <input
-              type="checkbox"
-              bind:checked={aaEnabled}
-              aria-label="Toggle anti-aliasing"
-              title="Toggle anti-aliasing"
-            />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="control-group">
-          <div class="control-label">
-            <span class="icon-play"></span>
-            <span>OS Media Sync</span>
-          </div>
-          <label class="switch">
-            <input
-              type="checkbox"
-              bind:checked={mediaSessionEnabled}
-              aria-label="Toggle OS media sync"
-              title="Toggle OS media sync"
-            />
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
 
     {#if presetListVisible}
       <div
@@ -502,6 +480,10 @@
       <div id="metadata-area" class:hidden={!metadata.title}>
         {#if metadata.art}
           <img id="album-art" src={metadata.art} alt="Album Art" />
+        {:else}
+          <div id="album-art" class="empty-art">
+            <span class="icon-music"></span>
+          </div>
         {/if}
         <div class="track-info">
           <h2>{metadata.title}</h2>
@@ -568,17 +550,6 @@
               class:icon-loop-playlist={loop === "playlist"}
             ></span>
           </button>
-          <button
-            class="icon-btn"
-            onclick={toggleFullscreen}
-            class:active={isFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-          >
-            <span
-              class:icon-windowed={isFullscreen}
-              class:icon-fullscreen={!isFullscreen}
-            ></span>
-          </button>
         </div>
         <div id="progress-container">
           <div id="progress-bar" style="width: {progressPercent}%"></div>
@@ -595,6 +566,17 @@
             max="100"
             oninput={() => appController.handleVolumeChange(volume)}
           />
+          <button
+            class="icon-btn"
+            onclick={toggleFullscreen}
+            class:active={isFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            <span
+              class:icon-windowed={isFullscreen}
+              class:icon-fullscreen={!isFullscreen}
+            ></span>
+          </button>
         </div>
         <div class="selection-row">
           <select
@@ -621,4 +603,87 @@
       </div>
     </div>
   </main>
+
+  {#if settingsVisible}
+    <div class="resizer resizer-right" onmousedown={startDragRight} role="separator" aria-orientation="vertical" tabindex="-1"></div>
+    <div
+      id="visual-settings-panel"
+      class="side-panel right-panel glass-panel"
+      style="width: {rightPanelWidth}px"
+    >
+      <div class="panel-header">
+        <h3>Settings</h3>
+        <button
+          class="close-btn"
+          onclick={() => (settingsVisible = false)}
+          aria-label="Close settings"
+        >
+          <span class="icon-close"></span>
+        </button>
+      </div>
+      <div class="visual-controls panel-content">
+        <div class="control-group">
+          <div class="control-label">
+            <span class="icon-palette"></span>
+            <span>Theme</span>
+          </div>
+          <select
+            bind:value={theme}
+            onchange={() => appController.handleShuffle()}
+            aria-label="Select theme"
+          >
+            <option value="theme-neon">Neon (Default)</option>
+            <option value="theme-sunset">Sunset</option>
+            <option value="theme-forest">Forest</option>
+            <option value="theme-midnight">Midnight</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span class="icon-scale"></span>
+            <span>Render Scale</span>
+          </div>
+          <select bind:value={renderScale} aria-label="Select render scale">
+            <option value={0.5}>0.5x</option>
+            <option value={1}>1.0x</option>
+            <option value={2.0}>2.0x</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span class="icon-aa"></span>
+            <span>Anti-Aliasing</span>
+          </div>
+          <label class="switch">
+            <input
+              type="checkbox"
+              bind:checked={aaEnabled}
+              aria-label="Toggle anti-aliasing"
+              title="Toggle anti-aliasing"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span class="icon-play"></span>
+            <span>OS Media Sync</span>
+          </div>
+          <label class="switch">
+            <input
+              type="checkbox"
+              bind:checked={mediaSessionEnabled}
+              aria-label="Toggle OS media sync"
+              title="Toggle OS media sync"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  {/if}
+  </div>
 </div>

@@ -217,7 +217,7 @@ export class AppController {
   public async handlePlaybackLoop() {
     if (this.controlClient && this.currentStreamId) {
       try {
-        const loopModes: Array<'none' | 'track' | 'playlist'> = ['none', 'track', 'playlist'];
+        const loopModes: Array<'none' | 'track' | 'playlist'> = ['none', 'playlist', 'track'];
         const currentIdx = loopModes.indexOf(this.playbackLoop);
         const nextLoop = loopModes[(currentIdx + 1) % loopModes.length];
         await this.controlClient.setStreamProperty(this.currentStreamId, 'loopStatus', nextLoop);
