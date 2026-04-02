@@ -103,12 +103,30 @@ export class SnapClient extends EventTarget {
         if (this.codec === 'flac') {
           this.decoder = new FLACDecoder();
           await this.decoder.ready;
+          if (codecMsg.payload.byteLength > 0) {
+            await this.decoder.decode(new Uint8Array(codecMsg.payload));
+          }
         } else if (this.codec === 'opus') {
           this.decoder = new OpusMLDecoder();
           await this.decoder.ready;
+          if (codecMsg.payload.byteLength > 8) {
+            const view = new DataView(codecMsg.payload);
+            let offset = 0;
+            while (offset < codecMsg.payload.byteLength) {
+              const packetSize = view.getUint32(offset, true);
+              offset += 4;
+              if (offset + packetSize > codecMsg.payload.byteLength) break;
+              const packet = new Uint8Array(codecMsg.payload, offset, packetSize);
+              await this.decoder.decode(packet);
+              offset += packetSize;
+            }
+          }
         } else if (this.codec === 'ogg' || this.codec === 'vorbis') {
           this.decoder = new OggVorbisDecoder();
           await this.decoder.ready;
+          if (codecMsg.payload.byteLength > 0) {
+            await this.decoder.decode(new Uint8Array(codecMsg.payload));
+          }
         }
 
         this.dispatchEvent(new CustomEvent('codec', { detail: codecMsg }));
