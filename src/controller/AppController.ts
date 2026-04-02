@@ -116,8 +116,19 @@ export class AppController {
           this.view.updateStreams(status.server.streams);
         }
         // Extract all clients from all groups
-        const allClients = status.server.groups.flatMap((g: any) => g.clients);
+        const allGroups = status.server.groups;
+        const allClients = allGroups.flatMap((g: any) => g.clients);
         this.view.updateClients(allClients);
+
+        // Resolve current stream if not set
+        if (!this.currentStreamId && this.client) {
+          const clientId = this.client.id;
+          const group = allGroups.find((g: any) => g.clients.some((c: any) => c.id === clientId));
+          if (group) {
+            this.currentStreamId = group.stream_id;
+            console.log('Resolved currentStreamId for client', clientId, ':', this.currentStreamId);
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to load status', e);
@@ -174,6 +185,8 @@ export class AppController {
       } catch (e) {
         console.error(`Failed to send ${command} command`, e);
       }
+    } else {
+      console.warn(`Cannot send ${command}: controlClient=${!!this.controlClient}, currentStreamId=${this.currentStreamId}`);
     }
   }
 
@@ -185,6 +198,8 @@ export class AppController {
       } catch (e) {
         console.error('Failed to toggle shuffle', e);
       }
+    } else {
+      console.warn(`Cannot toggle shuffle: controlClient=${!!this.controlClient}, currentStreamId=${this.currentStreamId}`);
     }
   }
 
@@ -198,6 +213,8 @@ export class AppController {
       } catch (e) {
         console.error('Failed to toggle loop', e);
       }
+    } else {
+      console.warn(`Cannot toggle loop: controlClient=${!!this.controlClient}, currentStreamId=${this.currentStreamId}`);
     }
   }
 

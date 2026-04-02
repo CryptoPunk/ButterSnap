@@ -26,11 +26,17 @@ export class SnapClient extends EventTarget {
   private decoder: any = null;
   private codec: string = 'pcm';
   private decoderReady: Promise<void> = Promise.resolve();
+  private clientId: string;
 
   constructor(private baseUrl: string, private audioContext?: AudioContext, streamId?: string) {
     super();
     this.timeProvider = new TimeProvider(audioContext);
     this.streamId = streamId || null;
+    this.clientId = this.getUuid();
+  }
+
+  public get id(): string {
+    return this.clientId;
   }
 
   public async connect(): Promise<void> {
@@ -76,7 +82,7 @@ export class SnapClient extends EventTarget {
       OS: 'web',
       Arch: 'universal',
       Instance: 1,
-      ID: this.getUuid(),
+      ID: this.clientId,
       SnapStreamProtocolVersion: 2,
     };
 
@@ -118,7 +124,7 @@ export class SnapClient extends EventTarget {
           this.decoderReady = (async () => {
             await dec.ready;
             if (codecMsg.payload.byteLength > 0) {
-              await dec.decode(new Uint8Array(codecMsg.payload));
+              await dec.decodeFrame(new Uint8Array(codecMsg.payload));
             }
           })();
         } else if (this.codec === 'ogg' || this.codec === 'vorbis') {
@@ -143,7 +149,9 @@ export class SnapClient extends EventTarget {
           try {
             // Wait for decoder to finish initializing with header data
             await this.decoderReady;
-            const decoded = await this.decoder.decode(new Uint8Array(pcm.payload));
+            const decoded = this.codec === 'opus' 
+              ? await this.decoder.decodeFrame(new Uint8Array(pcm.payload))
+              : await this.decoder.decode(new Uint8Array(pcm.payload));
             if (decoded && decoded.channelData && decoded.channelData.length > 0 && decoded.samplesDecoded > 0) {
               // Emit decoded audio data
               this.dispatchEvent(new CustomEvent('audio', { detail: { 
