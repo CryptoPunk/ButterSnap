@@ -1,5 +1,3 @@
-
-
 :root {
   /* Colors */
   --bg-color: #050505;
@@ -7,8 +5,10 @@
   --text-secondary: rgba(255, 255, 255, 0.6);
   --text-muted: rgba(255, 255, 255, 0.35);
 
-  --accent-primary: #8b5cf6; /* Electric Purple */
-  --accent-secondary: #06b6d4; /* Vibrant Cyan */
+  --accent-primary: #8b5cf6;
+  /* Electric Purple */
+  --accent-secondary: #06b6d4;
+  /* Vibrant Cyan */
   --accent-glow: rgba(139, 92, 246, 0.4);
 
   /* Glassmorphism */
@@ -41,20 +41,26 @@
 }
 
 .theme-sunset {
-  --accent-primary: #f97316; /* Orange */
-  --accent-secondary: #f43f5e; /* Rose */
+  --accent-primary: #f97316;
+  /* Orange */
+  --accent-secondary: #f43f5e;
+  /* Rose */
   --accent-glow: rgba(249, 115, 22, 0.4);
 }
 
 .theme-forest {
-  --accent-primary: #10b981; /* Emerald */
-  --accent-secondary: #06b6d4; /* Cyan */
+  --accent-primary: #10b981;
+  /* Emerald */
+  --accent-secondary: #06b6d4;
+  /* Cyan */
   --accent-glow: rgba(16, 185, 129, 0.4);
 }
 
 .theme-midnight {
-  --accent-primary: #3b82f6; /* Blue */
-  --accent-secondary: #8b5cf6; /* Purple */
+  --accent-primary: #3b82f6;
+  /* Blue */
+  --accent-secondary: #8b5cf6;
+  /* Purple */
   --accent-glow: rgba(59, 130, 246, 0.4);
 }
 
@@ -67,7 +73,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body {
+html,
+body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
@@ -96,14 +103,16 @@ html, body {
 }
 
 /* Utility: Glass Panel */
-.glass-panel, .hud-panel {
+.glass-panel,
+.hud-panel {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  box-shadow: 
+  box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.8),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05); /* Soft inner glow */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  /* Soft inner glow */
 }
 
 /* Layout */
@@ -122,8 +131,15 @@ header {
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .workspace {
@@ -132,11 +148,14 @@ header {
   z-index: 1;
   display: flex;
   overflow: hidden;
-  pointer-events: none; /* Let clicks pass through workspace to canvas if empty */
+  pointer-events: none;
+  /* Let clicks pass through workspace to canvas if empty */
 }
 
 /* Make sure interactive panels restore pointer events */
-.side-panel, .resizer, .ui-central-column {
+.side-panel,
+.resizer,
+.ui-central-column {
   pointer-events: auto;
 }
 
@@ -177,6 +196,7 @@ header {
   position: relative;
   border-radius: 0 !important;
 }
+
 .right-panel {
   border-right: none;
   border-left: 1px solid var(--glass-border);
@@ -197,6 +217,7 @@ header {
   color: var(--text-muted);
   gap: 0.5rem;
 }
+
 .empty-icon {
   width: 48px;
   height: 48px;
@@ -223,7 +244,8 @@ header {
   transition: background var(--transition-fast);
 }
 
-.resizer:hover::after, .dragging .resizer::after {
+.resizer:hover::after,
+.dragging .resizer::after {
   background: var(--accent-glow);
 }
 
@@ -232,7 +254,9 @@ header {
   user-select: none !important;
   transition: none !important;
 }
-.dragging, .dragging .resizer {
+
+.dragging,
+.dragging .resizer {
   cursor: col-resize !important;
 }
 
@@ -265,11 +289,11 @@ h1 {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-transform: lowercase;
+  /*text-transform: lowercase;*/
 }
 
 h1::first-letter {
-  text-transform: uppercase;
+  /*text-transform: uppercase;*/
 }
 
 #status-indicator {
@@ -551,13 +575,25 @@ button:disabled {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleUp {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-header {
@@ -666,8 +702,15 @@ button:disabled {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(150%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(150%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 #metadata-area {
@@ -914,49 +957,145 @@ select {
   background-color: #fff;
   transition: .4s;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--accent-primary);
   box-shadow: 0 0 10px var(--accent-glow);
   border-color: transparent;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
 }
 
 /* Icons sizing (fixed tiny icons) */
-.icon-play, .icon-pause, .icon-shuffle, .icon-prev, .icon-next,
-.icon-loop-none, .icon-loop-track, .icon-loop-playlist,
-.icon-gear, .icon-close, .icon-fullscreen, .icon-windowed, .icon-volume {
+.icon-play,
+.icon-pause,
+.icon-shuffle,
+.icon-prev,
+.icon-next,
+.icon-loop-none,
+.icon-loop-track,
+.icon-loop-playlist,
+.icon-gear,
+.icon-close,
+.icon-fullscreen,
+.icon-windowed,
+.icon-volume {
   display: inline-block;
-  width: 24px;   /* Standard size */
+  width: 24px;
+  /* Standard size */
   height: 24px;
 }
 
 /* Direct @apply for UnoCSS icons */
-.icon-play { @apply i-ph:play-fill; width: 32px; height: 32px; }
-.icon-pause { @apply i-ph:pause-fill; width: 32px; height: 32px; }
-.icon-shuffle { @apply i-ph:shuffle-bold; width: 24px; height: 24px; }
-.icon-prev { @apply i-ph:skip-back-fill; width: 26px; height: 26px; }
-.icon-next { @apply i-ph:skip-forward-fill; width: 26px; height: 26px; }
-.icon-loop-none { @apply i-ph:repeat-bold; width: 24px; height: 24px; }
-.icon-loop-track { @apply i-ph:repeat-once-bold; width: 24px; height: 24px; }
-.icon-loop-playlist { @apply i-ph:repeat-bold; width: 24px; height: 24px; }
-.icon-gear { @apply i-ph:gear-six-fill; width: 24px; height: 24px; }
-.icon-close { @apply i-ph:x-bold; width: 20px; height: 20px; }
-.icon-fullscreen { @apply i-ph:corners-out-bold; width: 24px; height: 24px; }
-.icon-windowed { @apply i-ph:corners-in-bold; width: 24px; height: 24px; }
-.icon-volume { @apply i-ph:speaker-high-fill; width: 20px; height: 20px; }
-.icon-search { @apply i-ph:magnifying-glass-bold; width: 20px; height: 20px; color: var(--text-muted); }
-.icon-palette { @apply i-ph:palette-fill; width: 18px; height: 18px; }
-.icon-scale { @apply i-ph:frame-corners-fill; width: 18px; height: 18px; }
-.icon-aa { @apply i-ph:intersect-square-fill; width: 18px; height: 18px; }
+.icon-play {
+  @apply i-ph:play-fill;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-pause {
+  @apply i-ph:pause-fill;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-shuffle {
+  @apply i-ph:shuffle-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-prev {
+  @apply i-ph:skip-back-fill;
+  width: 26px;
+  height: 26px;
+}
+
+.icon-next {
+  @apply i-ph:skip-forward-fill;
+  width: 26px;
+  height: 26px;
+}
+
+.icon-loop-none {
+  @apply i-ph:repeat-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-loop-track {
+  @apply i-ph:repeat-once-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-loop-playlist {
+  @apply i-ph:repeat-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-gear {
+  @apply i-ph:gear-six-fill;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-close {
+  @apply i-ph:x-bold;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-fullscreen {
+  @apply i-ph:corners-out-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-windowed {
+  @apply i-ph:corners-in-bold;
+  width: 24px;
+  height: 24px;
+}
+
+.icon-volume {
+  @apply i-ph:speaker-high-fill;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-search {
+  @apply i-ph:magnifying-glass-bold;
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+}
+
+.icon-palette {
+  @apply i-ph:palette-fill;
+  width: 18px;
+  height: 18px;
+}
+
+.icon-scale {
+  @apply i-ph:frame-corners-fill;
+  width: 18px;
+  height: 18px;
+}
+
+.icon-aa {
+  @apply i-ph:intersect-square-fill;
+  width: 18px;
+  height: 18px;
+}
 
 /* Overrides for larger center icons if needed */
-.playback-buttons .icon-play, 
+.playback-buttons .icon-play,
 .playback-buttons .icon-pause {
   width: 30px;
   height: 30px;
