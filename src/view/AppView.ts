@@ -1,3 +1,5 @@
+import { StreamProperties } from '../protocol/SnapProperties';
+
 export interface ViewEvents {
   onConnect: (url: string, streamId?: string) => void;
   onDisconnect: () => void;
@@ -19,6 +21,7 @@ export interface ViewEvents {
 export interface IAppView {
   updateStatus(state: string): void;
   updateMetadata(metadata: any): void;
+  updateStreamProperties(props: StreamProperties): void;
   updateProgress(position: number, duration: number): void;
   setPlaybackStatus(status: string): void;
   setPlaybackModes(shuffle: boolean, loopStatus: string): void;

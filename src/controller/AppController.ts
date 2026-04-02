@@ -139,31 +139,34 @@ export class AppController {
 
   public handleNotification(note: any) {
     (window as any).lastNote = note;
-    console.log('Notification received:', note.method, note.params);
+    console.log('Notification received:', note.method, note.params.id);
     switch (note.method) {
       case 'Stream.OnUpdate':
-        if (note.params.id === this.currentStreamId) {
+        if (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id)) {
+          if (!this.currentStreamId) {
+            this.currentStreamId = note.params.id;
+            console.log('Auto-setting currentStreamId to', this.currentStreamId);
+          }
           const stream = note.params.stream;
           const props = stream.properties || {};
           if (stream.metadata) {
             this.updateMediaMetadata(stream.metadata);
             props.metadata = stream.metadata;
           }
-          if (props.playbackStatus) {
-            this.updatePlaybackState(props.playbackStatus, props);
-          }
+          this.updatePlaybackState(props.playbackStatus || this.playbackStatus, props);
+          this.view.updateStreamProperties(props);
         }
         break;
       case 'Stream.OnProperties':
-        if (note.params.id === this.currentStreamId) {
-          const props = note.params;
-          if (props.metadata) this.updateMediaMetadata(props.metadata, props.position);
-          if (props.playbackStatus) {
-            this.updatePlaybackState(props.playbackStatus, props);
-          } else if (props.position !== undefined) {
-            // If only position changed
-            this.updatePlaybackState(this.playbackStatus, props);
+        if (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id)) {
+          if (!this.currentStreamId) {
+            this.currentStreamId = note.params.id;
+            console.log('Auto-setting currentStreamId to', this.currentStreamId);
           }
+          const props = note.params.properties;
+          if (props.metadata) this.updateMediaMetadata(props.metadata, props.position);
+          this.updatePlaybackState(props.playbackStatus || this.playbackStatus, props);
+          this.view.updateStreamProperties(props);
         }
         break;
       case 'Server.OnUpdate':
