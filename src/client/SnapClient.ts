@@ -109,17 +109,9 @@ export class SnapClient extends EventTarget {
         } else if (this.codec === 'opus') {
           this.decoder = new OpusMLDecoder();
           await this.decoder.ready;
-          if (codecMsg.payload.byteLength > 8) {
-            const view = new DataView(codecMsg.payload);
-            let offset = 0;
-            while (offset < codecMsg.payload.byteLength) {
-              const packetSize = view.getUint32(offset, true);
-              offset += 4;
-              if (offset + packetSize > codecMsg.payload.byteLength) break;
-              const packet = new Uint8Array(codecMsg.payload, offset, packetSize);
-              await this.decoder.decode(packet);
-              offset += packetSize;
-            }
+          // Feed initialization header (raw OpusHead) to prime channel state
+          if (codecMsg.payload.byteLength > 0) {
+            await this.decoder.decode(new Uint8Array(codecMsg.payload));
           }
         } else if (this.codec === 'ogg' || this.codec === 'vorbis') {
           this.decoder = new OggVorbisDecoder();
