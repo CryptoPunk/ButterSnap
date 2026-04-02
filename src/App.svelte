@@ -32,6 +32,7 @@
   let progressPercent = $state(0);
   let isFullscreen = $state(false);
   let loadStreamsLoading = $state(false);
+  let isEditingUrl = $state(false);
   let canGoNext = $state(true);
   let canGoPrevious = $state(true);
   let canPlay = $state(true);
@@ -216,35 +217,58 @@
     <div class="logo-area">
       <h1>ButterSync</h1>
       <div id="status-indicator" class={statusDotClass}>
-        <span id="status-dot"></span>
-        <span id="status">{status}</span>
+        <button
+          class="status-action-btn"
+          onclick={() => {
+            if (status === "CONNECTED") {
+              appController.handleDisconnect();
+            } else {
+              appController.handleLoadStreams(serverUrl);
+              appController.handleConnect(serverUrl, selectedStream);
+            }
+          }}
+          aria-label={status === "CONNECTED" ? "Disconnect" : "Connect"}
+          title={status}
+        >
+          <span
+            class:icon-connected={status === "CONNECTED"}
+            class:icon-disconnected={status !== "CONNECTED"}
+          ></span>
+        </button>
+        <div class="status-info-area">
+          {#if !isEditingUrl}
+            <span
+              class="status-label"
+              role="button"
+              tabindex="0"
+              onclick={() => (isEditingUrl = true)}
+              onkeydown={(e) => e.key === "Enter" && (isEditingUrl = true)}
+            >
+              {status}
+            </span>
+            <button
+              class="edit-btn"
+              onclick={() => (isEditingUrl = true)}
+              aria-label="Edit URL"
+              title="Edit URL"
+            >
+              <span class="icon-pencil"></span>
+            </button>
+          {:else}
+            <input
+              type="text"
+              bind:value={serverUrl}
+              placeholder="Snapserver URL"
+              onblur={() => (isEditingUrl = false)}
+              onkeydown={(e) => e.key === "Enter" && (isEditingUrl = false)}
+              autofocus
+            />
+          {/if}
+        </div>
       </div>
     </div>
 
     <div class="header-controls">
-      <div class="server-controls">
-        <input
-          type="text"
-          bind:value={serverUrl}
-          placeholder="Snapserver URL"
-        />
-        <button
-          onclick={() => appController.handleLoadStreams(serverUrl)}
-          disabled={loadStreamsLoading}
-          aria-label="Refresh stream list"
-        >
-          {loadStreamsLoading ? "..." : "List"}
-        </button>
-        <button
-          onclick={() =>
-            status === "CONNECTED"
-              ? appController.handleDisconnect()
-              : appController.handleConnect(serverUrl, selectedStream)}
-          aria-label={status === "CONNECTED" ? "Disconnect" : "Connect"}
-        >
-          {status === "CONNECTED" ? "Disconnect" : "Connect"}
-        </button>
-      </div>
       <button class="icon-btn" onclick={toggleSettings} aria-label="Settings">
         <span class="icon-gear"></span>
       </button>
@@ -430,7 +454,11 @@
           />
         </div>
         <div class="selection-row">
-          <select bind:value={selectedStream} title="Source Stream">
+          <select
+            bind:value={selectedStream}
+            title="Source Stream"
+            onfocus={() => appController.handleLoadStreams(serverUrl)}
+          >
             <option value="">Default Stream</option>
             {#each streams as stream}
               <option value={stream.id}>{stream.name}</option>
