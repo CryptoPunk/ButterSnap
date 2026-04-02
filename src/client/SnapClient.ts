@@ -25,6 +25,7 @@ export class SnapClient extends EventTarget {
   private streamId: string | null = null;
   private decoder: any = null;
   private codec: string = 'pcm';
+  private decoderReady: Promise<void> = Promise.resolve();
 
   constructor(private baseUrl: string, private audioContext?: AudioContext, streamId?: string) {
     super();
@@ -100,25 +101,37 @@ export class SnapClient extends EventTarget {
           this.decoder = null;
         }
 
+        // Set decoder and decoderReady promise atomically before any awaits that
+        // could allow a concurrent PcmChunk handler to slip through.
         if (this.codec === 'flac') {
-          this.decoder = new FLACDecoder();
-          await this.decoder.ready;
-          if (codecMsg.payload.byteLength > 0) {
-            await this.decoder.decode(new Uint8Array(codecMsg.payload));
-          }
+          const dec = new FLACDecoder();
+          this.decoder = dec;
+          this.decoderReady = (async () => {
+            await dec.ready;
+            if (codecMsg.payload.byteLength > 0) {
+              await dec.decode(new Uint8Array(codecMsg.payload));
+            }
+          })();
         } else if (this.codec === 'opus') {
-          this.decoder = new OpusMLDecoder();
-          await this.decoder.ready;
-          // Feed initialization header (raw OpusHead) to prime channel state
-          if (codecMsg.payload.byteLength > 0) {
-            await this.decoder.decode(new Uint8Array(codecMsg.payload));
-          }
+          const dec = new OpusMLDecoder();
+          this.decoder = dec;
+          this.decoderReady = (async () => {
+            await dec.ready;
+            if (codecMsg.payload.byteLength > 0) {
+              await dec.decode(new Uint8Array(codecMsg.payload));
+            }
+          })();
         } else if (this.codec === 'ogg' || this.codec === 'vorbis') {
-          this.decoder = new OggVorbisDecoder();
-          await this.decoder.ready;
-          if (codecMsg.payload.byteLength > 0) {
-            await this.decoder.decode(new Uint8Array(codecMsg.payload));
-          }
+          const dec = new OggVorbisDecoder();
+          this.decoder = dec;
+          this.decoderReady = (async () => {
+            await dec.ready;
+            if (codecMsg.payload.byteLength > 0) {
+              await dec.decode(new Uint8Array(codecMsg.payload));
+            }
+          })();
+        } else {
+          this.decoderReady = Promise.resolve();
         }
 
         this.dispatchEvent(new CustomEvent('codec', { detail: codecMsg }));
@@ -128,6 +141,8 @@ export class SnapClient extends EventTarget {
         const pcm = new PcmChunkMessage(buffer);
         if (this.decoder) {
           try {
+            // Wait for decoder to finish initializing with header data
+            await this.decoderReady;
             const decoded = await this.decoder.decode(new Uint8Array(pcm.payload));
             if (decoded && decoded.channelData && decoded.channelData.length > 0 && decoded.samplesDecoded > 0) {
               // Emit decoded audio data
