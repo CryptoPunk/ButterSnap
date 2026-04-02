@@ -37,6 +37,8 @@ export interface IAppView {
   getServerUrl(): string;
   setTheme(theme: string): void;
   getTheme(): string;
+  setMediaSessionEnabled(enabled: boolean): void;
+  getMediaSessionEnabled(): boolean;
   initVisualizer(audioContext: AudioContext, analyzer: AnalyserNode): void;
   stopLoop(): void;
   resumeLoop(): void;

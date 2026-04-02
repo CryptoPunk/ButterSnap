@@ -4,6 +4,7 @@
   import type { IAppView } from "./view/AppView";
   import butterchurn from "butterchurn";
   import { getPresets as getButterchurnPresets } from "butterchurn-presets";
+  import { MediaSessionExtension } from "./extensions/MediaSessionExtension";
 
   // State runes
   let serverUrl = $state("http://localhost:1780");
@@ -15,6 +16,7 @@
   let currentPreset = $state("");
   let renderScale = $state(1);
   let aaEnabled = $state(true);
+  let mediaSessionEnabled = $state(true);
   let metadata = $state({
     title: "Ready to Sync",
     artist: "Select a stream and connect",
@@ -56,10 +58,21 @@
   let visualizer: any = null;
   let presets: any = null;
   let appController: AppController;
+  let mediaSessionExt: MediaSessionExtension | null = null;
 
   $effect(() => {
     if (status !== "CONNECTED") {
       isInactive = false;
+    }
+  });
+
+  $effect(() => {
+    if (mediaSessionExt) {
+      if (mediaSessionEnabled) {
+        mediaSessionExt.enable();
+      } else {
+        mediaSessionExt.disable();
+      }
     }
   });
 
@@ -122,6 +135,12 @@
     },
     getAA() {
       return aaEnabled;
+    },
+    setMediaSessionEnabled(enabled) {
+      mediaSessionEnabled = enabled;
+    },
+    getMediaSessionEnabled() {
+      return mediaSessionEnabled;
     },
     setScale(scale) {
       renderScale = scale;
@@ -214,6 +233,8 @@
     presetNames = Object.keys(presets);
 
     appController = new AppController(viewImplementation);
+    mediaSessionExt = new MediaSessionExtension();
+    appController.registerExtension(mediaSessionExt);
 
     if (visShuffle) viewImplementation.startShuffleTimer();
 
@@ -402,6 +423,22 @@
               bind:checked={aaEnabled}
               aria-label="Toggle anti-aliasing"
               title="Toggle anti-aliasing"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span class="icon-play"></span>
+            <span>OS Media Sync</span>
+          </div>
+          <label class="switch">
+            <input
+              type="checkbox"
+              bind:checked={mediaSessionEnabled}
+              aria-label="Toggle OS media sync"
+              title="Toggle OS media sync"
             />
             <span class="slider"></span>
           </label>

@@ -2,6 +2,7 @@ import { SnapClient } from '../client/SnapClient';
 import { SnapControlClient } from '../client/SnapControlClient';
 import { IAppView, ViewEvents } from '../view/AppView';
 import { PcmChunkMessage, SampleFormat } from '../protocol/SnapMessage';
+import { AppExtension } from '../extensions/AppExtension';
 
 export class AppController {
   private view: IAppView;
@@ -13,14 +14,19 @@ export class AppController {
   private lastChunkEnd = 0;
   private chunksReceivedCount = 0;
   private playbackStatus: 'playing' | 'paused' | 'stopped' = 'stopped';
-  private currentStreamId: string | null = null;
+  public currentStreamId: string | null = null;
   private playbackShuffle = false;
   private playbackLoop: 'none' | 'track' | 'playlist' = 'none';
+  private extensions: AppExtension[] = [];
 
   constructor(view: IAppView) {
     this.view = view;
     this.loadSettings();
-    this.initMediaSession();
+  }
+
+  public registerExtension(extension: AppExtension) {
+    this.extensions.push(extension);
+    extension.initialize(this);
   }
 
   private loadSettings() {
@@ -32,6 +38,7 @@ export class AppController {
         if (settings.aa !== undefined) this.view.setAA(settings.aa);
         if (settings.scale !== undefined) this.view.setScale(settings.scale);
         if (settings.theme !== undefined) this.view.setTheme(settings.theme);
+        if (settings.mediaSession !== undefined) this.view.setMediaSessionEnabled(settings.mediaSession);
       } catch (e) {
         console.error('Failed to load settings', e);
       }
@@ -43,6 +50,7 @@ export class AppController {
       serverUrl: this.view.getServerUrl(),
       aa: this.view.getAA(),
       scale: this.view.getScale(),
+      mediaSession: this.view.getMediaSessionEnabled(),
       theme: document.body.classList.contains('theme-sunset') ? 'theme-sunset' :
         (document.body.classList.contains('theme-forest') ? 'theme-forest' :
           (document.body.classList.contains('theme-midnight') ? 'theme-midnight' : 'theme-neon')),
@@ -239,57 +247,11 @@ export class AppController {
     console.log('Selected client:', clientId);
   }
 
-  private initMediaSession() {
-    if (!('mediaSession' in navigator)) return;
-
-    navigator.mediaSession.setActionHandler('play', () => {
-      if (this.controlClient && this.currentStreamId) {
-        this.controlClient.controlStream(this.currentStreamId, 'play');
-      }
-    });
-
-    navigator.mediaSession.setActionHandler('pause', () => {
-      if (this.controlClient && this.currentStreamId) {
-        this.controlClient.controlStream(this.currentStreamId, 'pause');
-      }
-    });
-
-    navigator.mediaSession.setActionHandler('stop', () => {
-      if (this.controlClient && this.currentStreamId) {
-        this.controlClient.controlStream(this.currentStreamId, 'stop');
-      }
-    });
-
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-      if (this.controlClient && this.currentStreamId) {
-        this.controlClient.controlStream(this.currentStreamId, 'next');
-      }
-    });
-
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-      if (this.controlClient && this.currentStreamId) {
-        this.controlClient.controlStream(this.currentStreamId, 'previous');
-      }
-    });
-
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (this.controlClient && this.currentStreamId && details.seekTime !== undefined) {
-        this.controlClient.controlStream(this.currentStreamId, 'seek', { position: Math.round(details.seekTime * 1000) });
-      }
-    });
-  }
 
   private updateMediaMetadata(metadata?: any, position?: number) {
     if (!metadata) return;
 
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: metadata.title || 'Live Stream',
-        artist: Array.isArray(metadata.artist) ? metadata.artist.join(', ') : (metadata.artist || 'Snapcast'),
-        album: metadata.album || '',
-        artwork: metadata.artUrl ? [{ src: metadata.artUrl }] : []
-      });
-    }
+    this.extensions.forEach(ext => ext.onMetadataChange?.(metadata, position));
 
     this.view.updateMetadata({
       title: metadata.title,
@@ -303,21 +265,7 @@ export class AppController {
   public updatePlaybackState(status: 'playing' | 'paused' | 'stopped', properties?: any) {
     this.playbackStatus = status;
 
-    if (typeof navigator !== 'undefined' && navigator.mediaSession) {
-      try {
-        navigator.mediaSession.playbackState = status === 'playing' ? 'playing' : (status === 'paused' ? 'paused' : 'none');
-
-        if (properties?.metadata?.duration && typeof navigator.mediaSession.setPositionState === 'function') {
-          navigator.mediaSession.setPositionState({
-            duration: properties.metadata.duration / 1000,
-            playbackRate: properties.rate || 1,
-            position: Math.min(properties.position / 1000, properties.metadata.duration / 1000)
-          });
-        }
-      } catch (e) {
-        console.error('MediaSession update failed', e);
-      }
-    }
+    this.extensions.forEach(ext => ext.onPlaybackStateChange?.(status, properties));
 
     if (status === 'playing') {
       this.view.resumeLoop();

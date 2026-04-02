@@ -26,9 +26,11 @@ export class SnapClient extends EventTarget {
   private decoder: any = null;
   private codec: string = 'pcm';
   private decoderReady: Promise<void> = Promise.resolve();
+  public id: string;
 
   constructor(private baseUrl: string, private audioContext?: AudioContext, streamId?: string) {
     super();
+    this.id = this.getUuid();
     this.timeProvider = new TimeProvider(audioContext);
     this.streamId = streamId || null;
   }
@@ -76,7 +78,7 @@ export class SnapClient extends EventTarget {
       OS: 'web',
       Arch: 'universal',
       Instance: 1,
-      ID: this.getUuid(),
+      ID: this.id,
       SnapStreamProtocolVersion: 2,
     };
 
