@@ -1,4 +1,4 @@
-# ButterSync — Issues
+# ButterSnap — Issues
 
 ## Open
 

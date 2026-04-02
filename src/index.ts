@@ -1,5 +1,5 @@
 /**
- * ButterSync: Snapcast & Butterchurn Integration Library
+ * ButterSnap: Snapcast & Butterchurn Integration Library
  */
 
 // UI Components

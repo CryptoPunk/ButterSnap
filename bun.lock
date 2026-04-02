@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "buttersync",
+      "name": "buttersnap",
       "dependencies": {
         "@fontsource/outfit": "^5.2.8",
         "@phosphor-icons/web": "^2.1.2",

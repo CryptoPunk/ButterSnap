@@ -1,4 +1,4 @@
-# ButterSync — Project Structure
+# ButterSnap — Project Structure
 
 **Primary Contact:** Max Vohra <max-oss@seattlenetworks.com>
 
@@ -16,7 +16,7 @@
 
 ## Configuration & Build
 - [index.html](./index.html) - Main HTML shell and application entry point.
-- [jsr.json](./jsr.json) - Configuration for publishing the @max/buttersync package to the JSR registry.
+- [jsr.json](./jsr.json) - Configuration for publishing the @max/buttersnap package to the JSR registry.
 - [package.json](./package.json) - Project metadata, dependencies, and build script definitions.
 - [tsconfig.json](./tsconfig.json) - Compiler configuration for the TypeScript environment.
 - [uno.config.ts](./uno.config.ts) - Configuration for the UnoCSS utility-first styling engine.

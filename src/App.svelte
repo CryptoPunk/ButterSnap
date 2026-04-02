@@ -337,7 +337,7 @@
     <main class="ui-central-column">
       <header>
     <div class="logo-area">
-      <h1>ButterSync</h1>
+      <h1>ButterSnap</h1>
       <div id="status-indicator" class={statusDotClass}>
         <button
           class="status-action-btn"

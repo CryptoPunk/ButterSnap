@@ -72,9 +72,9 @@ export class SnapClient extends EventTarget {
     const hello = new HelloMessage();
     hello.json = {
       MAC: '00:00:00:00:00:00',
-      HostName: 'ButterSync Client',
+      HostName: 'ButterSnap Client',
       Version: '0.1.0',
-      ClientName: 'ButterSync',
+      ClientName: 'ButterSnap',
       OS: 'web',
       Arch: 'universal',
       Instance: 1,

@@ -30,7 +30,7 @@ export class AppController {
   }
 
   private loadSettings() {
-    const saved = localStorage.getItem('buttersync-settings');
+    const saved = localStorage.getItem('buttersnap-settings');
     if (saved) {
       try {
         const settings = JSON.parse(saved);
@@ -55,7 +55,7 @@ export class AppController {
         (document.body.classList.contains('theme-forest') ? 'theme-forest' :
           (document.body.classList.contains('theme-midnight') ? 'theme-midnight' : 'theme-neon')),
     };
-    localStorage.setItem('buttersync-settings', JSON.stringify(settings));
+    localStorage.setItem('buttersnap-settings', JSON.stringify(settings));
   }
 
   public async handleConnect(url: string, streamId?: string) {
