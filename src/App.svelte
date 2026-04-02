@@ -226,8 +226,8 @@
           </label>
         </div>
         <div class="control-group">
-          <button id="fullscreen-btn" onclick={toggleFullscreen} class:active={isFullscreen}>
-            <span class="icon {isFullscreen ? 'icon-windowed' : 'icon-fullscreen'}"></span>
+          <button id="fullscreen-btn" onclick={toggleFullscreen} class:active={isFullscreen} title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
+            <span class:icon-windowed={isFullscreen} class:icon-fullscreen={!isFullscreen}></span>
             <span class="btn-text">{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
           </button>
         </div>
