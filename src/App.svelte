@@ -5,6 +5,7 @@
   import butterchurn from "butterchurn";
   import { getPresets as getButterchurnPresets } from "butterchurn-presets";
   import { MediaSessionExtension } from "./extensions/MediaSessionExtension";
+  import { EventLoggerExtension } from "./extensions/EventLoggerExtension";
 
   // State runes
   let serverUrl = $state("http://localhost:1780");
@@ -97,6 +98,7 @@
   let presets: any = null;
   let appController: AppController;
   let mediaSessionExt: MediaSessionExtension | null = null;
+  let eventLoggerExt: EventLoggerExtension | null = null;
 
   $effect(() => {
     if (status !== "CONNECTED") {
@@ -273,6 +275,10 @@
     appController = new AppController(viewImplementation);
     mediaSessionExt = new MediaSessionExtension();
     appController.registerExtension(mediaSessionExt);
+
+    eventLoggerExt = new EventLoggerExtension();
+    appController.registerExtension(eventLoggerExt);
+    eventLoggerExt.enable();
 
     if (visShuffle) viewImplementation.startShuffleTimer();
 
