@@ -157,7 +157,7 @@ export class AppController {
     } else {
       console.log('Notification received:', note.method);
     }
-    
+
     switch (note.method) {
       case 'Stream.OnUpdate':
         if (note.params && (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id))) {
@@ -211,6 +211,16 @@ export class AppController {
       }
     } else {
       console.warn(`Cannot send ${command}: controlClient=${!!this.controlClient}, currentStreamId=${this.currentStreamId}`);
+    }
+  }
+
+  public async handleSeek(positionSeconds: number) {
+    if (this.controlClient && this.currentStreamId) {
+      try {
+        await this.controlClient.controlStream(this.currentStreamId, 'setPosition', { position: positionSeconds });
+      } catch (e) {
+        console.error('Failed to seek', e);
+      }
     }
   }
 
@@ -302,7 +312,7 @@ export class AppController {
     if (this.controlClient) {
       try {
         const status = await this.controlClient.getStatus();
-        const currentGroup = status.server.groups.find((g: any) => 
+        const currentGroup = status.server.groups.find((g: any) =>
           g.clients.some((c: any) => c.id === clientId)
         );
 
@@ -312,7 +322,7 @@ export class AppController {
           const remainingClientIds = currentGroup.clients
             .map((c: any) => c.id)
             .filter((id: any) => id !== clientId);
-          
+
           await this.controlClient.setGroupClients(currentGroup.id, remainingClientIds);
           // Refresh to ensure UI shows the new group
           await this.handleRefreshServer();
@@ -338,8 +348,8 @@ export class AppController {
       title: metadata.title,
       artist: Array.isArray(metadata.artist) ? metadata.artist.join(', ') : metadata.artist,
       art: metadata.artUrl,
-      position: position !== undefined ? position / 1000 : undefined,
-      duration: metadata.duration !== undefined ? metadata.duration / 1000 : undefined
+      position: position !== undefined ? position : undefined,
+      duration: metadata.duration !== undefined ? metadata.duration : undefined
     });
   }
 
@@ -358,7 +368,7 @@ export class AppController {
 
     if (properties) {
       if (properties.position !== undefined && properties.metadata?.duration !== undefined) {
-        this.view.updateProgress(properties.position / 1000, properties.metadata.duration / 1000);
+        this.view.updateProgress(properties.position, properties.metadata.duration);
       }
 
       // Update shuffle/loop buttons if present in properties

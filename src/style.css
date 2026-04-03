@@ -803,22 +803,62 @@ button:disabled {
   gap: 1.25rem;
 }
 
-#progress-container {
+.progress-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   width: 100%;
-  max-width: 500px;
-  height: 4px;
+  max-width: 600px;
+  animation: fadeIn 0.4s ease;
+}
+
+.time-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+}
+
+#progress-container {
+  flex: 1;
+  height: 6px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  cursor: pointer;
+  border-radius: 3px;
   position: relative;
 }
 
+#seek-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+#seek-slider:disabled {
+  cursor: default;
+}
+
 #progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
   height: 100%;
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-  box-shadow: 0 0 10px var(--accent-glow);
+  box-shadow: 0 0 12px var(--accent-glow);
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 1;
   transition: width 0.1s linear;
+}
+
+#progress-container:hover #progress-bar {
+  background: linear-gradient(90deg, #fff, var(--accent-secondary));
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
 }
 
 /* Audio Controls */

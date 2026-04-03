@@ -33,6 +33,8 @@
   let settingsVisible = $state(false);
   let isInactive = $state(false);
   let progressPercent = $state(0);
+  let progressPositionSeconds = $state(0);
+  let progressDurationSeconds = $state(0);
   let isFullscreen = $state(false);
   let loadStreamsLoading = $state(false);
   let isEditingUrl = $state(false);
@@ -162,6 +164,31 @@
     }
   });
 
+  $effect(() => {
+    if (playbackStatus === "playing" && progressDurationSeconds > 0) {
+      let lastTickTime = performance.now();
+      const interval = setInterval(() => {
+        const now = performance.now();
+        const deltaMs = now - lastTickTime;
+        lastTickTime = now;
+
+        const deltaSec = deltaMs / 1000;
+        if (progressPositionSeconds + deltaSec < progressDurationSeconds) {
+          progressPositionSeconds += deltaSec;
+          progressPercent = Math.min(
+            100,
+            (progressPositionSeconds / progressDurationSeconds) * 100,
+          );
+        } else {
+          progressPositionSeconds = progressDurationSeconds;
+          progressPercent = 100;
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  });
+
   const viewImplementation: IAppView = {
     updateStatus(state) {
       status = state;
@@ -175,10 +202,21 @@
       };
       if (m.position !== undefined && m.duration !== undefined) {
         this.updateProgress(m.position, m.duration);
+      } else {
+        progressPositionSeconds = 0;
+        progressDurationSeconds = 0;
+        progressPercent = 0;
       }
     },
     updateProgress(pos, dur) {
-      if (!dur) return;
+      if (!dur) {
+        progressDurationSeconds = 0;
+        progressPositionSeconds = 0;
+        progressPercent = 0;
+        return;
+      }
+      progressPositionSeconds = pos;
+      progressDurationSeconds = dur;
       progressPercent = Math.min(100, (pos / dur) * 100);
     },
     setPlaybackStatus(s) {
@@ -374,6 +412,17 @@
     } else {
       document.exitFullscreen();
     }
+  }
+
+  function formatTime(seconds: number): string {
+    if (isNaN(seconds) || seconds < 0) return "0:00";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
+    return `${m}:${s.toString().padStart(2, "0")}`;
   }
 </script>
 
@@ -649,8 +698,22 @@
               ></span>
             </button>
           </div>
-          <div id="progress-container">
-            <div id="progress-bar" style="width: {progressPercent}%"></div>
+          <div class="progress-area" class:hidden={progressDurationSeconds <= 0}>
+            <span class="time-label">{formatTime(progressPositionSeconds)}</span>
+            <div id="progress-container">
+              <input
+                type="range"
+                id="seek-slider"
+                min="0"
+                max={progressDurationSeconds || 100}
+                value={progressPositionSeconds}
+                oninput={(e) => appController.handleSeek(parseFloat(e.currentTarget.value))}
+                disabled={!canSeek || progressDurationSeconds <= 0}
+                aria-label="Seek track"
+              />
+              <div id="progress-bar" style="width: {progressPercent}%"></div>
+            </div>
+            <span class="time-label">{formatTime(progressDurationSeconds)}</span>
           </div>
         </div>
 

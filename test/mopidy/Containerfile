@@ -1,6 +1,6 @@
-from alpine:latest
+FROM alpine:latest
 
-RUN apk add --no-cache multirun python3 py3-pip py3-setuptools py3-gobject3 py3-gst py3-websocket-client gstreamer gstreamer-tools 7zip snapcast
+RUN apk add --no-cache multirun python3 py3-pip py3-setuptools py3-gobject3 py3-gst py3-websocket-client gstreamer gstreamer-tools 7zip snapcast gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav gst-plugins-rs
 RUN python3 -m venv --upgrade-deps --system-site-packages /opt/mopidy
 RUN /opt/mopidy/bin/pip install mopidy mopidy-bandcamp
 RUN mkfifo /tmp/snapfifo
