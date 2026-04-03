@@ -12,6 +12,7 @@
   let statusDotClass = $state("");
   let streams = $state<{ id: string; name: string }[]>([]);
   let clients = $state<{ id: string; name: string }[]>([]);
+  let serverGroups = $state<any[]>([]);
   let presetNames = $state<string[]>([]);
   let currentPreset = $state("");
   let renderScale = $state(1);
@@ -50,9 +51,14 @@
 
   // Additional Panel State
   let mediaBrowserVisible = $state(false);
+  let devicesBrowserVisible = $state(false);
   let leftPanelWidth = $state(280);
   let rightPanelWidth = $state(280);
   let draggingPanel = $state<"left" | "right" | null>(null);
+  let editingGroupId = $state<string | null>(null);
+  let editingName = $state("");
+  let inputElement = $state<HTMLInputElement | null>(null);
+  let isDraggingClient = $state(false);
 
   function onDragMove(e: MouseEvent) {
     if (!draggingPanel) return;
@@ -86,16 +92,58 @@
     e.preventDefault();
   }
 
+  function startEditingGroup(groupId: string, name: string) {
+    editingGroupId = groupId;
+    editingName = name || "";
+    // Wait for the input to mount, then focus
+    setTimeout(() => {
+      if (inputElement) {
+        inputElement.focus();
+        inputElement.select();
+      }
+    }, 0);
+  }
+
+  function cancelEditingGroup() {
+    editingGroupId = null;
+    editingName = "";
+  }
+
+  function saveGroupName(groupId: string) {
+    if (appController) {
+      appController.handleGroupNameChange(groupId, editingName);
+    }
+    editingGroupId = null;
+    editingName = "";
+  }
+
+  function handleGroupKeydown(e: KeyboardEvent, groupId: string) {
+    if (e.key === "Enter") {
+      saveGroupName(groupId);
+    } else if (e.key === "Escape") {
+      cancelEditingGroup();
+    }
+  }
+
   let filteredPresets = $derived(
     presetNames.filter((name) =>
       name.toLowerCase().includes(presetSearch.toLowerCase()),
     ),
   );
 
+  let displayGroups = $derived(
+    serverGroups
+      .map((group) => ({
+        ...group,
+        connectedClients: (group.clients || []).filter((c: any) => c.connected),
+      }))
+      .filter((group) => group.connectedClients.length > 0),
+  );
+
   let canvasElement: HTMLCanvasElement;
   let visualizer: any = null;
   let presets: any = null;
-  let appController: AppController;
+  let appController = $state<AppController>(null!);
   let mediaSessionExt: MediaSessionExtension | null = null;
 
   $effect(() => {
@@ -151,6 +199,18 @@
         id: c.id,
         name: `${c.host?.name || "Unknown"} (${c.id.substring(0, 6)})`,
       }));
+    },
+    updateServerGroups(groups) {
+      serverGroups = groups;
+      if (appController?.client?.id) {
+        const selfClient = groups.flatMap((g: any) => g.clients || [])
+          .find((c: any) => c.id === appController.client?.id);
+        
+        if (selfClient && selfClient.config?.volume) {
+          volume = selfClient.config.volume.percent;
+          streamMuted = selfClient.config.volume.muted;
+        }
+      }
     },
     updateStreamProperties(props) {
       if (props.canGoNext !== undefined) canGoNext = props.canGoNext;
@@ -596,14 +656,29 @@
 
         <div class="audio-controls">
           <div class="control-row">
-            <span id="volume-icon"><span class="icon-volume"></span></span>
+            <button
+              class="icon-btn volume-mute-btn"
+              onclick={() => appController.handleClientVolumeChange(appController.client?.id, volume, !streamMuted)}
+              title="Toggle Mute"
+              aria-label="Toggle Mute"
+            >
+              <span class={streamMuted ? "icon-volume-mute" : "icon-volume"}></span>
+            </button>
             <input
               type="range"
               bind:value={volume}
               min="0"
               max="100"
-              oninput={() => appController.handleVolumeChange(volume)}
+              oninput={() => appController.handleClientVolumeChange(appController.client?.id, volume, streamMuted)}
             />
+            <button
+              class="icon-btn"
+              onclick={() => (devicesBrowserVisible = !devicesBrowserVisible)}
+              class:active={devicesBrowserVisible}
+              title="Devices"
+            >
+              <span class="icon-speaker"></span>
+            </button>
             <button
               class="icon-btn"
               onclick={toggleFullscreen}
@@ -615,28 +690,6 @@
                 class:icon-fullscreen={!isFullscreen}
               ></span>
             </button>
-          </div>
-          <div class="selection-row">
-            <select
-              bind:value={selectedStream}
-              title="Source Stream"
-              onfocus={() => appController.handleLoadStreams(serverUrl)}
-            >
-              <option value="">Default Stream</option>
-              {#each streams as stream}
-                <option value={stream.id}>{stream.name}</option>
-              {/each}
-            </select>
-            <select
-              bind:value={selectedClient}
-              title="Playback Device"
-              onchange={() => appController.handleClientChange(selectedClient)}
-            >
-              <option value="">This Browser</option>
-              {#each clients as client}
-                <option value={client.id}>{client.name}</option>
-              {/each}
-            </select>
           </div>
         </div>
       </div>
@@ -727,6 +780,195 @@
               <span class="slider"></span>
             </label>
           </div>
+        </div>
+      </div>
+    {/if}
+
+    {#if devicesBrowserVisible && !settingsVisible}
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+      <div
+        class="resizer resizer-right"
+        onmousedown={startDragRight}
+        role="separator"
+        aria-orientation="vertical"
+        tabindex="-1"
+      ></div>
+      <div
+        id="devices-panel"
+        class="side-panel right-panel glass-panel"
+        style="width: {rightPanelWidth}px"
+      >
+        <div class="panel-header">
+          <h3>Devices</h3>
+          <div class="header-actions">
+            <button
+              class="icon-btn refresh-btn"
+              onclick={() => appController.handleRefreshServer()}
+              title="Refresh Devices"
+              aria-label="Refresh Devices"
+            >
+              <span class="icon-refresh"></span>
+            </button>
+            <button
+              class="close-btn"
+              onclick={() => (devicesBrowserVisible = false)}
+              aria-label="Close devices"
+            >
+              <span class="icon-close"></span>
+            </button>
+          </div>
+        </div>
+        <div 
+          class="panel-content devices-list"
+          ondragover={(e) => {
+            if (isDraggingClient) {
+              e.preventDefault();
+              e.dataTransfer!.dropEffect = "move";
+            }
+          }}
+          ondrop={(e) => {
+            if (isDraggingClient) {
+              e.preventDefault();
+              const clientId = e.dataTransfer?.getData("text/plain");
+              if (clientId) {
+                appController.handleClientMoveToNewGroup(clientId);
+              }
+              isDraggingClient = false;
+            }
+          }}
+        >
+          {#each displayGroups as group}
+            <div 
+              class="snap-group"
+              ondragover={(e) => {
+                if (isDraggingClient) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer!.dropEffect = "move";
+                }
+              }}
+              ondragenter={(e) => {
+                if (isDraggingClient) {
+                  e.stopPropagation();
+                  e.currentTarget.classList.add("drag-over");
+                }
+              }}
+              ondragleave={(e) => {
+                if (isDraggingClient) {
+                  e.stopPropagation();
+                  e.currentTarget.classList.remove("drag-over");
+                }
+              }}
+              ondrop={(e) => {
+                if (isDraggingClient) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.currentTarget.classList.remove("drag-over");
+                  const clientId = e.dataTransfer?.getData("text/plain");
+                  if (clientId) {
+                    appController.handleClientMoveToGroup(clientId, group.id);
+                  }
+                  isDraggingClient = false;
+                }
+              }}
+              role="region"
+              aria-label="Device Group"
+            >
+              <div class="group-header">
+                {#if editingGroupId === group.id}
+                  <input
+                    type="text"
+                    class="group-name-input"
+                    bind:value={editingName}
+                    bind:this={inputElement}
+                    onkeydown={(e) => handleGroupKeydown(e, group.id)}
+                  />
+                  <div class="header-actions">
+                    <button class="icon-btn" onclick={() => saveGroupName(group.id)} title="Save">
+                      <span class="icon-check"></span>
+                    </button>
+                    <button class="icon-btn" onclick={cancelEditingGroup} title="Cancel">
+                      <span class="icon-x"></span>
+                    </button>
+                  </div>
+                {:else}
+                  <div class="group-name-container">
+                    <span class="group-name">{group.name || ""}</span>
+                    <button
+                      class="icon-btn edit-group-btn"
+                      onclick={(e) => { e.stopPropagation(); startEditingGroup(group.id, group.name); }}
+                      title="Rename Group"
+                    >
+                      <span>✎</span>
+                    </button>
+                  </div>
+                  <select
+                    value={group.stream_id}
+                    onchange={(e) => appController.handleGroupStreamChange(group.id, e.currentTarget.value)}
+                  >
+                    {#each streams as stream}
+                      <option value={stream.id}>{stream.name}</option>
+                    {/each}
+                  </select>
+                {/if}
+              </div>
+              <div class="group-clients">
+                {#each group.connectedClients as client}
+                  <div 
+                    class="snap-client {client.id === appController.client?.id ? 'is-self' : ''}"
+                    draggable="true"
+                    role="button"
+                    tabindex="0"
+                    ondragstart={(e) => {
+                      if (e.dataTransfer) {
+                        isDraggingClient = true;
+                        e.dataTransfer.effectAllowed = "move";
+                        e.dataTransfer.setData("text/plain", client.id);
+                      }
+                    }}
+                    ondragend={() => {
+                      isDraggingClient = false;
+                    }}
+                  >
+                    <div class="client-info">
+                      <span class="client-name">
+                        {client.host?.name || "Unknown"}
+                      </span>
+                    </div>
+                    <div class="client-volume-row">
+                      <button 
+                        class="icon-btn volume-mute-btn" 
+                        title="Toggle Mute"
+                        aria-label="Toggle Mute"
+                        onclick={() => appController.handleClientVolumeChange(client.id, client.config.volume.percent, !client.config.volume.muted)}>
+                        <span class={client.config.volume.muted ? "icon-volume-mute" : "icon-volume"}></span>
+                      </button>
+                      <input 
+                        type="range" 
+                        min="0" max="100" 
+                        value={client.config.volume.percent}
+                        onchange={(e) => appController.handleClientVolumeChange(client.id, parseInt(e.currentTarget.value), false)}
+                      />
+                      <span class="volume-label">{client.config.volume.percent}%</span>
+                    </div>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/each}
+          
+          {#each isDraggingClient ? [1] : [] as _}
+            <div class="new-group-zone">
+              <span class="icon-plus"></span>
+              <span>Drop to Create New Group</span>
+            </div>
+          {/each}
+
+          {#if displayGroups.length === 0}
+            <div class="empty-state">
+              <p>No devices connected.</p>
+            </div>
+          {/if}
         </div>
       </div>
     {/if}

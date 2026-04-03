@@ -27,6 +27,7 @@ export interface IAppView {
   setPlaybackModes(shuffle: boolean, loopStatus: string): void;
   updateStreams(streams: any[]): void;
   updateClients(clients: any[]): void;
+  updateServerGroups(groups: any[]): void;
   setLoadStreamsLoading(loading: boolean): void;
   updateDebugInfo(chunks: number, latency: number): void;
   setAA(enabled: boolean): void;

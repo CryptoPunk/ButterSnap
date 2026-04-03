@@ -1,12 +1,13 @@
 from alpine:latest
 
-RUN apk add --no-cache multirun python3 py3-pip py3-setuptools py3-gobject3 py3-gst py3-websocket-client gstreamer gstreamer-tools snapcast 
+RUN apk add --no-cache multirun python3 py3-pip py3-setuptools py3-gobject3 py3-gst py3-websocket-client gstreamer gstreamer-tools 7zip snapcast
 RUN python3 -m venv --upgrade-deps --system-site-packages /opt/mopidy
 RUN /opt/mopidy/bin/pip install mopidy mopidy-bandcamp
 RUN mkfifo /tmp/snapfifo
 COPY mopidy.conf /etc/mopidy/mopidy.conf
 COPY snapserver.conf /etc/snapcast/snapserver.conf
-
+ADD https://github.com/snapcast/snapweb/releases/download/v0.9.3/snapweb.zip /tmp/snapweb.zip
+RUN 7z x /tmp/snapweb.zip -y -o/usr/share/snapserver/snapweb/
 EXPOSE 6680
 
 CMD ["multirun", "/opt/mopidy/bin/mopidy --config /etc/mopidy/mopidy.conf", "snapserver -c /etc/snapcast/snapserver.conf"]

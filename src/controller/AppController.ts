@@ -127,6 +127,7 @@ export class AppController {
         const allGroups = status.server.groups;
         const allClients = allGroups.flatMap((g: any) => g.clients);
         this.view.updateClients(allClients);
+        this.view.updateServerGroups(allGroups);
 
         // Resolve current stream if not set
         if (!this.currentStreamId && this.client) {
@@ -145,12 +146,21 @@ export class AppController {
     }
   }
 
+  public async handleRefreshServer() {
+    await this.handleLoadStreams(this.view.getServerUrl());
+  }
+
   public handleNotification(note: any) {
     (window as any).lastNote = note;
-    console.log('Notification received:', note.method, note.params.id);
+    if (note.params && note.params.id) {
+      console.log('Notification received:', note.method, note.params.id);
+    } else {
+      console.log('Notification received:', note.method);
+    }
+    
     switch (note.method) {
       case 'Stream.OnUpdate':
-        if (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id)) {
+        if (note.params && (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id))) {
           if (!this.currentStreamId) {
             this.currentStreamId = note.params.id;
             console.log('Auto-setting currentStreamId to', this.currentStreamId);
@@ -166,7 +176,7 @@ export class AppController {
         }
         break;
       case 'Stream.OnProperties':
-        if (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id)) {
+        if (note.params && (note.params.id === this.currentStreamId || (!this.currentStreamId && note.params.id))) {
           if (!this.currentStreamId) {
             this.currentStreamId = note.params.id;
             console.log('Auto-setting currentStreamId to', this.currentStreamId);
@@ -178,8 +188,11 @@ export class AppController {
         }
         break;
       case 'Server.OnUpdate':
-        this.handleLoadStreams(this.view.getServerUrl());
-        break;
+      case 'Group.OnUpdate':
+      case 'Group.OnMute':
+      case 'Group.OnStreamChanged':
+      case 'Group.OnNameChanged':
+      case 'Client.OnUpdate':
       case 'Client.OnVolumeChanged':
       case 'Client.OnConnect':
       case 'Client.OnDisconnect':
@@ -229,15 +242,83 @@ export class AppController {
     }
   }
 
-  public async handleVolumeChange(volume: number) {
+  public async handleClientVolumeChange(clientId: string | undefined, percent: number, muted: boolean = false) {
+    if (this.controlClient && clientId) {
+      try {
+        await this.controlClient.setClientVolume(clientId, percent, muted);
+        // Refresh to ensure UI shows the change immediately
+        await this.handleRefreshServer();
+      } catch (e) {
+        console.error('Failed to change client volume', e);
+      }
+    }
+  }
+
+
+  public async handleGroupStreamChange(groupId: string, streamId: string) {
     if (this.controlClient) {
-      // If we have a current client ID, set its volume. 
-      // For now, let's assume we are controlling 'this browser' client if we can identify it, 
-      // or the first connected client.
-      const status = await this.controlClient.getStatus();
-      const clientId = status.server.groups[0]?.clients[0]?.id; // Fallback
-      if (clientId) {
-        await this.controlClient.setClientVolume(clientId, volume);
+      try {
+        await this.controlClient.setGroupStream(groupId, streamId);
+      } catch (e) {
+        console.error('Failed to change group stream', e);
+      }
+    }
+  }
+
+  public async handleGroupNameChange(groupId: string, name: string) {
+    if (this.controlClient) {
+      try {
+        await this.controlClient.setGroupName(groupId, name);
+        // Refresh to ensure UI shows the rename
+        await this.handleRefreshServer();
+      } catch (e) {
+        console.error('Failed to change group name', e);
+      }
+    }
+  }
+
+  public async handleClientMoveToGroup(clientId: string, targetGroupId: string) {
+    if (this.controlClient) {
+      try {
+        const status = await this.controlClient.getStatus();
+        const targetGroup = status.server.groups.find((g: any) => g.id === targetGroupId);
+        if (targetGroup) {
+          // Add this client to the target group's clients. Snapserver automatically removes it from the previous group
+          const clientIds = targetGroup.clients.map((c: any) => c.id);
+          if (!clientIds.includes(clientId)) {
+            clientIds.push(clientId);
+            await this.controlClient.setGroupClients(targetGroupId, clientIds);
+            // Refresh to ensure UI shows the move
+            await this.handleRefreshServer();
+          }
+        }
+      } catch (e) {
+        console.error('Failed to move client to group', e);
+      }
+    }
+  }
+
+  public async handleClientMoveToNewGroup(clientId: string) {
+    if (this.controlClient) {
+      try {
+        const status = await this.controlClient.getStatus();
+        const currentGroup = status.server.groups.find((g: any) => 
+          g.clients.some((c: any) => c.id === clientId)
+        );
+
+        if (currentGroup && currentGroup.clients.length > 1) {
+          // Remove this client from its current group. 
+          // Snapserver will automatically create a new group for the orphaned client.
+          const remainingClientIds = currentGroup.clients
+            .map((c: any) => c.id)
+            .filter((id: any) => id !== clientId);
+          
+          await this.controlClient.setGroupClients(currentGroup.id, remainingClientIds);
+          // Refresh to ensure UI shows the new group
+          await this.handleRefreshServer();
+        }
+      } catch (e) {
+        console.error('Failed to move client to new group', e);
       }
     }
   }
