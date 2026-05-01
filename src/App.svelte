@@ -241,9 +241,10 @@
     updateServerGroups(groups) {
       serverGroups = groups;
       if (appController?.client?.id) {
-        const selfClient = groups.flatMap((g: any) => g.clients || [])
+        const selfClient = groups
+          .flatMap((g: any) => g.clients || [])
           .find((c: any) => c.id === appController.client?.id);
-        
+
         if (selfClient && selfClient.config?.volume) {
           volume = selfClient.config.volume.percent;
           streamMuted = selfClient.config.volume.muted;
@@ -698,8 +699,12 @@
               ></span>
             </button>
           </div>
-          <div class="progress-area" class:hidden={progressDurationSeconds <= 0}>
-            <span class="time-label">{formatTime(progressPositionSeconds)}</span>
+          <div
+            class="progress-area"
+            class:hidden={progressDurationSeconds <= 0}
+          >
+            <span class="time-label">{formatTime(progressPositionSeconds)}</span
+            >
             <div id="progress-container">
               <input
                 type="range"
@@ -707,13 +712,15 @@
                 min="0"
                 max={progressDurationSeconds || 100}
                 value={progressPositionSeconds}
-                oninput={(e) => appController.handleSeek(parseFloat(e.currentTarget.value))}
+                oninput={(e) =>
+                  appController.handleSeek(parseFloat(e.currentTarget.value))}
                 disabled={!canSeek || progressDurationSeconds <= 0}
                 aria-label="Seek track"
               />
               <div id="progress-bar" style="width: {progressPercent}%"></div>
             </div>
-            <span class="time-label">{formatTime(progressDurationSeconds)}</span>
+            <span class="time-label">{formatTime(progressDurationSeconds)}</span
+            >
           </div>
         </div>
 
@@ -721,18 +728,29 @@
           <div class="control-row">
             <button
               class="icon-btn volume-mute-btn"
-              onclick={() => appController.handleClientVolumeChange(appController.client?.id, volume, !streamMuted)}
+              onclick={() =>
+                appController.handleClientVolumeChange(
+                  appController.client?.id,
+                  volume,
+                  !streamMuted,
+                )}
               title="Toggle Mute"
               aria-label="Toggle Mute"
             >
-              <span class={streamMuted ? "icon-volume-mute" : "icon-volume"}></span>
+              <span class={streamMuted ? "icon-volume-mute" : "icon-volume"}
+              ></span>
             </button>
             <input
               type="range"
               bind:value={volume}
               min="0"
               max="100"
-              oninput={() => appController.handleClientVolumeChange(appController.client?.id, volume, streamMuted)}
+              oninput={() =>
+                appController.handleClientVolumeChange(
+                  appController.client?.id,
+                  volume,
+                  streamMuted,
+                )}
             />
             <button
               class="icon-btn"
@@ -881,7 +899,10 @@
             </button>
           </div>
         </div>
-        <div 
+        <div
+          label="Device Tray"
+          role="listbox"
+          tabindex="0"
           class="panel-content devices-list"
           ondragover={(e) => {
             if (isDraggingClient) {
@@ -901,8 +922,10 @@
           }}
         >
           {#each displayGroups as group}
-            <div 
+            <div
               class="snap-group"
+              role="group"
+              aria-label="Device Group"
               ondragover={(e) => {
                 if (isDraggingClient) {
                   e.preventDefault();
@@ -934,8 +957,6 @@
                   isDraggingClient = false;
                 }
               }}
-              role="region"
-              aria-label="Device Group"
             >
               <div class="group-header">
                 {#if editingGroupId === group.id}
@@ -947,10 +968,18 @@
                     onkeydown={(e) => handleGroupKeydown(e, group.id)}
                   />
                   <div class="header-actions">
-                    <button class="icon-btn" onclick={() => saveGroupName(group.id)} title="Save">
+                    <button
+                      class="icon-btn"
+                      onclick={() => saveGroupName(group.id)}
+                      title="Save"
+                    >
                       <span class="icon-check"></span>
                     </button>
-                    <button class="icon-btn" onclick={cancelEditingGroup} title="Cancel">
+                    <button
+                      class="icon-btn"
+                      onclick={cancelEditingGroup}
+                      title="Cancel"
+                    >
                       <span class="icon-x"></span>
                     </button>
                   </div>
@@ -959,7 +988,10 @@
                     <span class="group-name">{group.name || ""}</span>
                     <button
                       class="icon-btn edit-group-btn"
-                      onclick={(e) => { e.stopPropagation(); startEditingGroup(group.id, group.name); }}
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        startEditingGroup(group.id, group.name);
+                      }}
                       title="Rename Group"
                     >
                       <span>✎</span>
@@ -967,7 +999,11 @@
                   </div>
                   <select
                     value={group.stream_id}
-                    onchange={(e) => appController.handleGroupStreamChange(group.id, e.currentTarget.value)}
+                    onchange={(e) =>
+                      appController.handleGroupStreamChange(
+                        group.id,
+                        e.currentTarget.value,
+                      )}
                   >
                     {#each streams as stream}
                       <option value={stream.id}>{stream.name}</option>
@@ -977,11 +1013,12 @@
               </div>
               <div class="group-clients">
                 {#each group.connectedClients as client}
-                  <div 
-                    class="snap-client {client.id === appController.client?.id ? 'is-self' : ''}"
+                  <div
+                    class="snap-client {client.id === appController.client?.id
+                      ? 'is-self'
+                      : ''}"
                     draggable="true"
-                    role="button"
-                    tabindex="0"
+                    role="listitem"
                     ondragstart={(e) => {
                       if (e.dataTransfer) {
                         isDraggingClient = true;
@@ -999,27 +1036,45 @@
                       </span>
                     </div>
                     <div class="client-volume-row">
-                      <button 
-                        class="icon-btn volume-mute-btn" 
+                      <button
+                        class="icon-btn volume-mute-btn"
                         title="Toggle Mute"
                         aria-label="Toggle Mute"
-                        onclick={() => appController.handleClientVolumeChange(client.id, client.config.volume.percent, !client.config.volume.muted)}>
-                        <span class={client.config.volume.muted ? "icon-volume-mute" : "icon-volume"}></span>
+                        onclick={() =>
+                          appController.handleClientVolumeChange(
+                            client.id,
+                            client.config.volume.percent,
+                            !client.config.volume.muted,
+                          )}
+                      >
+                        <span
+                          class={client.config.volume.muted
+                            ? "icon-volume-mute"
+                            : "icon-volume"}
+                        ></span>
                       </button>
-                      <input 
-                        type="range" 
-                        min="0" max="100" 
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
                         value={client.config.volume.percent}
-                        onchange={(e) => appController.handleClientVolumeChange(client.id, parseInt(e.currentTarget.value), false)}
+                        onchange={(e) =>
+                          appController.handleClientVolumeChange(
+                            client.id,
+                            parseInt(e.currentTarget.value),
+                            false,
+                          )}
                       />
-                      <span class="volume-label">{client.config.volume.percent}%</span>
+                      <span class="volume-label"
+                        >{client.config.volume.percent}%</span
+                      >
                     </div>
                   </div>
                 {/each}
               </div>
             </div>
           {/each}
-          
+
           {#each isDraggingClient ? [1] : [] as _}
             <div class="new-group-zone">
               <span class="icon-plus"></span>
